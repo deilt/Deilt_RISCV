@@ -3,17 +3,17 @@
 
 
 ## 相关资料参考
-> 《计算机组成与设计——硬件软件接口(risc-v)》</n>
-> 《Computer Organization and Design RISC-V edition》
-> 《手把手教你设计CPU-RISC-V处理器篇》
-> 《RISC-V架构与嵌入式开发快速入门》
-> 《The RISC-V Instruction Set Manual Volume I: Unprivileged ISA》
-> 《RISC-V 指令集手册 卷1：用户级指令集体系结构（User-Level ISA） 2.1 版》
-> 《The RISC-V Instruction Set Manual Volume II: Privileged Architecture》
-> 《RISC-V 指令集手册 卷2：特权体系结构（Privileged Architecture） 特权体系结构 1.7 版》
-> 《The RISC-V Reader中文版》
-> 《riscv-debug-spec-stable_0.13》
-> 《riscv-debug-release_0.13.2》
+> - 《计算机组成与设计——硬件软件接口(risc-v)》
+> - 《Computer Organization and Design RISC-V edition》
+> - 《手把手教你设计CPU-RISC-V处理器篇》
+> - 《RISC-V架构与嵌入式开发快速入门》
+> - 《The RISC-V Instruction Set Manual Volume I: Unprivileged ISA》
+> - 《RISC-V 指令集手册 卷1：用户级指令集体系结构（User-Level ISA） 2.1 版》
+> - 《The RISC-V Instruction Set Manual Volume II: Privileged Architecture》
+> - 《RISC-V 指令集手册 卷2：特权体系结构（Privileged Architecture） 特权体系结构 1.7 版》
+> - 《The RISC-V Reader中文版》
+> - 《riscv-debug-spec-stable_0.13》
+> - 《riscv-debug-release_0.13.2》
 
 
 # Deilt_RISC介绍
