@@ -160,7 +160,7 @@ CSR 寄存器的访问采用专用的 CSR 指令，包括 CSRRW 、 CSRRS, CSRRC
 ### features
 
 ### Hierarchy
-![[附件/Pasted image 20230103192014.jpg]]![[attachment/Architecture.png]]
+![](attachment/Architecture.png)
 #### Function of each modules
 ### Configurable
 - 五级流水
