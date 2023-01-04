@@ -3,7 +3,7 @@
 
 
 ## 相关资料参考
-> 《计算机组成与设计——硬件软件接口(risc-v)》
+> 《计算机组成与设计——硬件软件接口(risc-v)》</n>
 > 《Computer Organization and Design RISC-V edition》
 > 《手把手教你设计CPU-RISC-V处理器篇》
 > 《RISC-V架构与嵌入式开发快速入门》
