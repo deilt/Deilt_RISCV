@@ -14,6 +14,7 @@
 > - 《The RISC-V Reader中文版》
 > - 《riscv-debug-spec-stable_0.13》
 > - 《riscv-debug-release_0.13.2》
+> - 《自制CPU入门》
 
 
 # Deilt_RISC介绍
