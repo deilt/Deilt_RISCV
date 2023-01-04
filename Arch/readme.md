@@ -13,7 +13,7 @@
 	- 精简指令集计算机（RISC ： Reduced Instruction Set Computer）。
 	- 主要区别是，CISC 的每条指令对应的 0、1 编码串长度不一，而 RISC 的每条指令对应的 0、1 编码串长度是固定的。
 
-![[attachment/Pasted image 20221230115004.png]]
+![](./attachment/Pasted_image_20221230115004.png)
 ### 1.４ ISA分类
 主要的ISA也只有几种：x86、ARM、SPARC、POWER、MIPS，除了 x86 是 CISC ISA 外，其余都是 RISC ISA。
 
@@ -49,7 +49,7 @@
 
 
 ### 指令编码
-![[attachment/Pasted_image_20230104150155.png]]
+![](./attachment/Pasted_image_20230104150155.png)
 
 ### 分支预测
 `默认情况下：静态分支预测机制`
@@ -65,7 +65,7 @@ RISC-V 架构定义了 3 种工作模式，又称为特权模式（ Privileged M
 
 
 ### CSR寄存器
-`控制和状态寄存器（ Control and Status Register，CSR ）`，用于配 置或记录一些运行的状态。CSR 寄存器是处理器核内部的寄存器，**使用自己的地址编码空间**和存储器寻址的地址区间完全无关系 。
+`控制和状态寄存器（ Control and Status Register，CSR ）`，用于配置或记录一些运行的状态。CSR 寄存器是处理器核内部的寄存器，**使用自己的地址编码空间**和存储器寻址的地址区间完全无关系 。
 CSR 寄存器的访问采用专用的 CSR 指令，包括 CSRRW 、 CSRRS, CSRRC 、 CSRRWI 、 CSRRSI 以及 CSRRCI 指令。
 
 ### 中断异常
@@ -89,17 +89,17 @@ CSR 寄存器的访问采用专用的 CSR 指令，包括 CSRRW 、 CSRRS, CSRRC
 软件生态对于CPU是十分重要的，运行在CPU上的软件是CPU的灵魂所在，完备的软件工具链是CPU能够真正运行的第一步。
 官网地址：[https://riscv.org/]()
 
->gitbuh工具链地址：[https://github.com/riscv-software-src/riscv-tools]()   
->`riscv-isa-sim(Spike)` 是一个基于 C/C++ 开发的指令集模拟器。  
->`riscv-pk` 提供 RISC-V 可执行文件运行的程序运行环境，同时提供最简单的 bootloader;
->`riscv-fesvr`是一个用于实现上位机和 CPU 之间通信机制的库。
->`riscv-tests`, 是 一组 RISC-V 指令集测试用例。
->`riscv-opcodes` 模拟器可执行的所有RISC-V操作码,是一个 阳SC-V 操作码信息转换脚本。
->--------------------------------------
->riscv-gnu -toolchain 是支持 RISC-V 的 GNU 工具链，包含了以下内容。 
->`riscv-gcc` : GCC 编译器 。 
->`riscv-binutils-gdb` ： 二进制工具（链接器 ， 汇编器等）、 GDB调试工具等。 
->`riscv-glibc` : GNU C 标准库实现 。
+>gitbuh工具链地址：[https://github.com/riscv-software-src/riscv-tools]()      
+>`riscv-isa-sim(Spike)` 是一个基于 C/C++ 开发的指令集模拟器。     
+>`riscv-pk` 提供 RISC-V 可执行文件运行的程序运行环境，同时提供最简单的 bootloader;   
+>`riscv-fesvr`是一个用于实现上位机和 CPU 之间通信机制的库。  
+>`riscv-tests`, 是 一组 RISC-V 指令集测试用例。   
+>`riscv-opcodes` 模拟器可执行的所有RISC-V操作码,是一个 阳SC-V 操作码信息转换脚本。  
+>--------------------------------------  
+>riscv-gnu -toolchain 是支持 RISC-V 的 GNU 工具链，包含了以下内容。   
+>`riscv-gcc` : GCC 编译器 。   
+>`riscv-binutils-gdb` ： 二进制工具（链接器 ， 汇编器等）、 GDB调试工具等。   
+>`riscv-glibc` : GNU C 标准库实现 。  
 
 如需使用RISC-V 的工具链，除了按照 GitHub 上的说明下载源代码进行编译生成之外， 还可以直接下载己经预先编译好的 GNU 工具链和 Windows IDE 开发工具 。
 ## 1.4 需要掌握的知识点
@@ -132,7 +132,7 @@ CSR 寄存器的访问采用专用的 CSR 指令，包括 CSRRW 、 CSRRS, CSRRC
 
 
 
-![[附件/Pasted image 20230104165725.png]]
+![](attachment/Pasted_image_20230104184000.png)
 ## 编码风格及注意要点
 - 统一采用Verilog RTL编码风格
 - 使用标准 DFF 模块例化生成寄存器。
