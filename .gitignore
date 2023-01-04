@@ -1,0 +1,11 @@
+*.v~
+*.log
+*.conf
+*.key
+/csrc/
+/simv.daidir/
+simv
+/verdiLog/
+*.v.out
+*手把手*
+*硬件软件*
