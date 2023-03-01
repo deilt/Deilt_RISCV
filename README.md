@@ -15,22 +15,35 @@
 > - 《riscv-debug-spec-stable_0.13》
 > - 《riscv-debug-release_0.13.2》
 > - 《自制CPU入门》
+> - 《自己动手写cpu》
+> -  [蜂鸟e203开源risc-v](https://github.com/deilt/e200_opensource)
 
 
-# Deilt_RISC介绍
-## 目的
+# Deilt_RISC Introduction
+## 1 feature
 本项目拟设计一个五级流水的单核32位处理器（Deilt_RISC），采用Verilog编写。其具有以下特点：
-- 五级流水
-- 支持RV32IM指令集 
+- 
+- 按序发射按序执行按序写回的五级流水线 
+- 单周期 多周期？？
+- 采用静态预测机制
+- RV32I（40条指令）（32位通用寄存器,基础整数指令集）
+- 拓展指令Ｍ，乘除拓展（4条乘法，2条除法，2条取余），试商法实现除法运算
+- 仅支持机器模式（Machine Mode）
+- 配备完整的ITCM 和DTCM(Sram)
+- verilog 2001语法编写
 - 支持中断
-- 支持AMBA总线
-- 支持UART、GPIO、SPI、Timer
-- ROM
-- RAM
-- JTAG
-- 后续跟新
+- 模块与模块的接口均采用严谨的 valid-ready 握手接口
+- IP模块包括：中断控制器、计时器（TImer）、UART、SPI
+- 支持JTAG调试
+- 未完待续。。。
 
-## 整体框架图
+## 2 Architecture
 
-### CORE
-### peripherals
+![](attachment/../Arch/attachment/deilt_riscv_arch.png)
+
+
+# 进程
+## 2023-03-01
+···
+
+···
