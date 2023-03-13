@@ -39,7 +39,7 @@
 
 ## 2 Architecture
 
-![](../Arch/attachment/deilt_riscv_arch.png)
+![](/Arch/attachment/deilt_riscv_arch.png)
 
 ## 3 工程目录文件说明
 
