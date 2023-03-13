@@ -20,13 +20,13 @@
 // *********************************************************************************
 `include "defines.v"
 module rom(
-    input                       clk,
+    input                       clk     ,
     input[`InstAddrBus]         instaddr,
-    input[`InstBus]             data_in,
-    input                       cs,     //chip select
-    input                       we,     //write enable ,1 write ,0 read
-    input[3:0]                  wem,    //写使能端口选择信号，用于选择要写入的RAM单元。
-    output[`InstBus]            data_o,
+    input[`InstBus]             data_in ,
+    input                       cs      ,     //chip select
+    input                       we      ,     //write enable ,1 write ,0 read
+    input[3:0]                  wem     ,    //写使能端口选择信号，用于选择要写入的RAM单元。
+    output[`InstBus]            data_o  
 
 );
     
@@ -35,7 +35,7 @@ module rom(
     #(
         .DP(`InstMemNum),
         .AW(`InstAddrWidth),
-        .DW(`InstBus),
+        .DW(`InstWidth),
         .MW(4),
         .FORCE_X2ZERO (0)
     )

@@ -36,14 +36,19 @@ module ex(
     output                          cs_o        ,
     output                          mem_we_o    ,
     output[`MemUnit-1:0]            mem_wem_o   ,  
-    output[`Membus]                 mem_din     ,
+    output[`MemBus]                 mem_din     ,
     output[`MemAddrBus]             mem_addr_o  ,
 
     output                          regs_wen_o  ,
     output[`RegAddrBus]             rd_addr_o   ,
-    output[`RegBus]                 rd_data_o   ,
+    output[`RegBus]                 rd_data_o   
 
 );
+    reg [`InstBus]              inst_o;
+    reg [`InstAddrBus]          instaddr_o;
+    reg                         regs_wen_o;
+    reg [`RegAddrBus]           rd_addr_o;
+    
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
     wire [6:0]  funct7 = inst_i[31:25];
@@ -58,28 +63,28 @@ module ex(
     wire [`RegBus]              sri_shift_mask;
     wire [`RegBus]              sr_shift_mask;
     //rd_data_o
-    rd_data_o = rd_data;
+    assign rd_data_o = rd_data;
 
     //----------------------------------------
     //add 
     //In order to save resources the adder here is shared
-    op1_add_op2 = op1_i + op2_i;
+    assign op1_add_op2 = op1_i + op2_i;
     //-----------------------------------------
 
     //-----------------------------------------
     //compare logic
     //unsigned 
-    op1_be_op2_unsigned = op1_i >= op2_i;
-    op1_eq_op2          =  (op1_i == op2_i);
+    assign op1_be_op2_unsigned = op1_i >= op2_i;
+    assign op1_eq_op2          =  (op1_i == op2_i);
     //signed
-    op1_be_op2_signed   = $signed(op1_i) >= $signed(op2_i);
+    assign op1_be_op2_signed   = $signed(op1_i) >= $signed(op2_i);
 
     //----------------------------------------
 
     //-----------------------------------------
     //shift right arith imm
     `ifdef SRAI_NEED
-        srai_logi = (op1_i >> shamt) || (({32{op1_i[31]}}) && ~((32'hffffffff) >> shamt));
+        srai_logi = (op1_i >> shamt) | (({32{op1_i[31]}}) & ~((32'hffffffff) >> shamt));
     `endif  
 
     assign sri_shift        = op1_i >> inst_i[24:20];
@@ -125,7 +130,7 @@ module ex(
                             rd_data = op1_i >> shamt;
                         end
                         else begin
-                            rd_data = (op1_i >> shamt) || (({32{op1_i[31]}}) && ~((32'hffffffff) >> shamt));
+                            rd_data = (op1_i >> shamt) | (({32{op1_i[31]}}) & ~((32'hffffffff) >> shamt));
                         end
                     end
                     default:begin

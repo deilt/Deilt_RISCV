@@ -1,4 +1,3 @@
-
 `timescale  1ns/1ps
 
 module tinyrisc_v_soc_tb;

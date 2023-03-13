@@ -80,13 +80,15 @@ module id(
                         op1_o = rs1_data_i ;
                         op2_o = sign_expd_imm;
                         regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
                     end
                     `INST_SLLI,`INST_SRLI,`INST_SRAI:begin
                         rs1_addr_o = rs1;
                         //rs2_addr_o = `ZeroRegAddr;
                         op1_o = rs1_data_i ;
-                        op2_o = {{27h'0},rs2}; //(shamt) shamt = rs2
+                        op2_o = {{27'h0},rs2}; //(shamt) shamt = rs2
                         regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
                     end
                 endcase
             end

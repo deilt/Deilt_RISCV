@@ -49,7 +49,7 @@ module gnrl_dfflrd#(
 
     //check x
 `ifndef  FPGA_SOURCE
-`ifndef  DISABLE_SV_ASSERTION
+`ifdef   ENABLE_SV_ASSERTION
     gnrl_xchecker #(.DW(1))
     u_gnrl_xchecker(
         .i_dat(lden),
@@ -89,7 +89,7 @@ module gnrl_dfflrs#(
 
     //check x
 `ifndef  FPGA_SOURCE
-`ifndef  DISABLE_SV_ASSERTION
+`ifdef   ENABLE_SV_ASSERTION
     gnrl_xchecker #(.DW(1))
     u_gnrl_xchecker(
         .i_dat(lden),
@@ -129,7 +129,7 @@ module gnrl_dfflr#(
 
     //check x
 `ifndef  FPGA_SOURCE
-`ifndef  DISABLE_SV_ASSERTION
+`ifdef   ENABLE_SV_ASSERTION
     gnrl_xchecker #(.DW(1))
     u_gnrl_xchecker(
         .i_dat(lden),
@@ -164,7 +164,7 @@ module gnrl_dffl#(
 
     //check x
 `ifndef  FPGA_SOURCE
-`ifndef  DISABLE_SV_ASSERTION
+`ifdef   ENABLE_SV_ASSERTION
     gnrl_xchecker #(.DW(1))
     u_gnrl_xchecker(
         .i_dat(lden),
@@ -255,11 +255,11 @@ module gnrl_latch#(
 
 
 `ifndef FPGA_SOURCE//{
-`ifndef DISABLE_SV_ASSERTION//{
+`ifdef  ENABLE_SV_ASSERTION//{
 //synopsys translate_off
 always_comb
 begin
-  CHECK_THE_X_VALUE:
+CHECK_THE_X_VALUE:
     assert (lden !== 1'bx) 
     else $fatal ("\n Error: Oops, detected a X value!!! This should never happen. \n");
 end

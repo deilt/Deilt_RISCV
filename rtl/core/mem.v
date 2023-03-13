@@ -30,7 +30,7 @@ module mem(
     input[`RegAddrBus]          rd_addr_i       ,
     input[`RegBus]              rd_data_i       ,
     //from ram
-    input[`Membus]              mem_data_i      ,
+    input[`MemBus]              mem_data_i      ,
     //to mem_wb
     output[`InstBus]            inst_o          ,
     output[`InstAddrBus]        instaddr_o      ,

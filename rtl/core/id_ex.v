@@ -51,22 +51,22 @@ module id_ex(
 
     //op1 dff
     reg [`RegBus]           op1_r;
-    gnrl_dfflr #(32) instaddr_gnrl_dfflr(clk,rstn,lden,op1_i,op1_r);
+    gnrl_dfflr #(32) op1_gnrl_dfflr(clk,rstn,lden,op1_i,op1_r);
     assign op1_o = op1_r;
     
     //op2 dff
     reg [`RegBus]           op2_r;
-    gnrl_dfflr #(32) instaddr_gnrl_dfflr(clk,rstn,lden,op2_i,op2_r);
+    gnrl_dfflr #(32) op2_gnrl_dfflr(clk,rstn,lden,op2_i,op2_r);
     assign op2_o = op2_r;
 
     //regs_wen dff
     reg                     regs_wen_r;
-    gnrl_dfflr #(1) instaddr_gnrl_dfflr(clk,rstn,lden,regs_wen_i,regs_wen_r);
+    gnrl_dfflr #(1) res_wen_gnrl_dfflr(clk,rstn,lden,regs_wen_i,regs_wen_r);
     assign regs_wen_o = regs_wen_r;
 
     //rd_addr_o
     reg [`RegAddrBus]       rd_addr_r;
-    gnrl_dfflr #(`RegAddrBus) instaddr_gnrl_dfflr(clk,rstn,lden,rd_addr_i,rd_addr_r);
+    gnrl_dfflr #(`RegAddrWidth) rd_addr_gnrl_dfflr(clk,rstn,lden,rd_addr_i,rd_addr_r);
     assign rd_addr_o = rd_addr_r;
 
 endmodule

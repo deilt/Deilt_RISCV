@@ -31,6 +31,7 @@
 
 //ROM 
 `define InstBus         31:0         //ROM的数据总线宽度
+`define InstWidth       32
 `define InstAddrBus     31:0         //ROM的地址总线宽度
 `define InstAddrWidth   32
 `define InstMemNum      131071       //ROM的实际大小为128KB

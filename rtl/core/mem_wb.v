@@ -19,7 +19,7 @@
 //  
 // *********************************************************************************
 `include "defines.v"
-module (
+module mem_wb(
     input                       clk             ,
     input                       rstn            ,
     //from mem
@@ -35,7 +35,8 @@ module (
     //to regs
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
-    output[`RegBus]             rd_data_o       
+    output[`RegBus]             rd_data_o       ,
+    input                       lden
 );
     //inst dff
     reg [`InstBus]          inst_r;
@@ -59,6 +60,6 @@ module (
 
     //rd_data
     reg [`RegBus]           rd_data_r;
-    gnrl_dfflr #(`RegWidth) _gnrl_dfflr(clk,rstn,lden,rd_data_i,rd_data_r);
+    gnrl_dfflr #(`RegWidth) rd_data_gnrl_dfflr(clk,rstn,lden,rd_data_i,rd_data_r);
     assign rd_data_o = rd_data_r;    
 endmodule

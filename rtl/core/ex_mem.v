@@ -19,7 +19,7 @@
 //  
 // *********************************************************************************
 `include "defines.v"
-module (
+module ex_mem(
     input                           clk         ,
     input                           rstn        ,
     //from ex
@@ -29,7 +29,7 @@ module (
     input                           cs_i        ,
     input                           mem_we_i    ,
     input[`MemUnit-1:0]             mem_wem_i   ,  
-    input[`Membus]                  mem_din     ,
+    input[`MemBus]                  mem_din     ,
     input[`MemAddrBus]              mem_addr_i  ,
 
     input                           regs_wen_i  ,
@@ -43,12 +43,14 @@ module (
     output                          cs_o        ,
     output                          mem_we_o    ,
     output[`MemUnit-1:0]            mem_wem_o   ,  
-    output[`Membus]                 mem_dout    ,
+    output[`MemBus]                 mem_dout    ,
     output[`MemAddrBus]             mem_addr_o  ,
 
     output                          regs_wen_o  ,
     output[`RegAddrBus]             rd_addr_o   ,
-    output[`RegBus]                 rd_data_o   
+    output[`RegBus]                 rd_data_o   ,
+
+    output                          lden
 );
     //inst dff
     reg [`InstBus]          inst_r;
@@ -72,11 +74,11 @@ module (
 
     //mem_wem
     reg [`MemUnit-1:0]      mem_wem_r;
-    gnrl_dfflr #(32) mem_wem_gnrl_dfflr(clk,rstn,lden,mem_wem_i,mem_wem_r);
+    gnrl_dfflr #(`MemUnit) mem_wem_gnrl_dfflr(clk,rstn,lden,mem_wem_i,mem_wem_r);
     assign mem_wem_o = mem_wem_r;
 
     //mem_din
-    reg [`Membus]           mem_din_r;
+    reg [`MemBus]           mem_din_r;
     gnrl_dfflr #(`MemWidth) mem_din_gnrl_dfflr(clk,rstn,lden,mem_din,mem_din_r);
     assign mem_dout = mem_din_r;
 
@@ -97,7 +99,7 @@ module (
 
     //rd_data
     reg [`RegBus]           rd_data_r;
-    gnrl_dfflr #(`RegWidth) _gnrl_dfflr(clk,rstn,lden,rd_data_i,rd_data_r);
+    gnrl_dfflr #(`RegWidth) rd_data_gnrl_dfflr(clk,rstn,lden,rd_data_i,rd_data_r);
     assign rd_data_o = rd_data_r;
 
 endmodule

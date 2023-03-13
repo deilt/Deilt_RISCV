@@ -41,8 +41,12 @@ module gnrl_ram
     wire [MW-1:0] wen;            //写使能信号，用于选择要写入的RAM单元
     wire ren;                     //读使能信号，用于控制读操作
 
+    wire [AW-1:0]     addr_r2;
+
     assign ren = cs & (~we);
     assign wen = ({MW{cs & we}} & wem);
+
+    assign addr_r2 = addr >> 2 ;
 
     genvar i;
 
@@ -74,7 +78,7 @@ module gnrl_ram
     endgenerate
 
     wire [DW-1:0] dout_pre;
-    assign dout_pre = mem_r[addr];
+    assign dout_pre = mem_r[addr_r2];
 
     generate
     if(FORCE_X2ZERO == 1) begin: force_x_to_zero

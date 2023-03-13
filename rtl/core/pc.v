@@ -20,10 +20,10 @@
 // *********************************************************************************
 `include "defines.v"
 
-module (
+module pc(
     input               clk         ,
     input               rstn        ,
-    input[`InstAddrBus] pc          ,
+    output[`InstAddrBus] pc          
 );
     reg [`InstAddrBus]  pc ;
 

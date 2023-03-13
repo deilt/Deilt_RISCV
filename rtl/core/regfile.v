@@ -34,6 +34,9 @@ module regfile(
     input[`RegBus]                  wr_data_i
 );
     reg [`RegBus] regs_mem[`RegDepth-1:0] ;
+    reg [`RegBus]   rs1_data_o;
+    reg [`RegBus]   rs2_data_o;
+    
     //read rs1
     always @(*)begin
         if(rstn == `RstEnable)

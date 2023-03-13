@@ -22,7 +22,7 @@
 // *********************************************************************************
 
 `ifndef FPGA_SOURCE//{  //若没有定义则编译
-`ifndef DISABLE_SV_ASSERTION//{
+`ifdef  ENABLE_SV_ASSERTION//{
 //synopsys translate_off
 module gnrl_xchecker #(
     parameter DW = 32
