@@ -18,7 +18,7 @@
 // 2023-03-13   Deilt           1.0                     Original
 //  
 // *********************************************************************************
-`include "defines.v"
+`include "../defines/defines.v"
 module riscv_core(
     input                           clk ,
     input                           rstn

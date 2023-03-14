@@ -18,7 +18,7 @@
 // 2023-03-10   Deilt           1.0                     Original
 //  
 // *********************************************************************************
-`include "defines.v"
+`include "../defines/defines.v"
 module ram(
     input                       clk         ,
     input[`MemAddrBus]          addr        ,
