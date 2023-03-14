@@ -29,9 +29,9 @@
 - 64位数据宽度，低功耗
 - 由一块数据宽度为 64 位的单口 SRAM 组成
 - 专用总线访问
-![](attachment/20230106172153.png)
+![](attachment/itcm.png)
 ## DTCM（DataTightly Coupled Memory）数据紧耦合存储器
 - 32位数据宽度
 - 由一块数据宽度为 32 位的单口 SRAM 组成
 - 专用总线访问
-![](attachment/20230106172201.png)
+![](attachment/dtcm.png)

@@ -39,19 +39,22 @@ AXI (Advanced eXtensible Interface )是一 种总线协议，是ARM公司提出�
 - **命令通道（ Command Channel ）** ：主要用于主设备向从设备发起读写请求。
 - **返回通道（ Response Channel ）**：主要用于从设备向主设备返回读写结果。
 
-![](attachment/20230106192844.png)
+![](attachment/icb2.png)
 
 ## ICB总线协议时序
-![](attachment/20230106221014.png)![](attachment/20230106221021.png)
-![](attachment/20230106221028.png)
-![](attachment/20230106221050.png)
+![](attachment/icbtime1.png)
+
+![](attachment/icbtime2.png)
+![](attachment/icbtime3.png)
+![](attachment/icbtime4.png)
 
 ## ICB总线的硬件实现
 ### 一主多从
-![](attachment/20230107104318.png)
+![](attachment/icbmaster.png)
+
 ### 多主一从
-![](attachment/20230107104455.png)
+![](attachment/mumas.png)
 ### 多主多从
-![](attachment/20230107105017.png)
+![](attachment/duozhuduocong.png)
 
 # BIU ICB
