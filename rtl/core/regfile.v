@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-10   Deilt           1.0                     Original
-//  
+// 2023-03-14   Deilt           2.0                     v0.1
 // *********************************************************************************
 `include "../defines/defines.v"
 module regfile(
@@ -25,13 +25,15 @@ module regfile(
     //from id
     input[`RegAddrBus]              rs1_addr_i  ,
     input[`RegAddrBus]              rs2_addr_i  ,
+    input                           rs1_read_i  ,
+    input                           rs2_read_i  ,
     //to id
     output[`RegBus]                 rs1_data_o  ,
     output[`RegBus]                 rs2_data_o  ,
     //from wb
     input                           wen         ,
     input[`RegAddrBus]              wr_addr_i   ,
-    input[`RegBus]                  wr_data_i
+    input[`RegBus]                  wr_data_i   
 );
     reg [`RegBus] regs_mem[`RegDepth-1:0] ;
     reg [`RegBus]   rs1_data_o;
@@ -41,16 +43,24 @@ module regfile(
     always @(*)begin
         if(rstn == `RstEnable)
             rs1_data_o = `ZeroReg ;
-        else 
+        else if(wen == `WriteEnable && wr_addr_i == rs1_addr_i && rs1_read_i == `ReadEnable )
+            rs1_data_o = wr_data_i;
+        else if(rs1_read_i == `ReadEnable)
             rs1_data_o = regs_mem[rs1_addr_i];
+        else
+            rs1_data_o = `ZeroReg;
     end
 
     //read rs2
     always @(*)begin
         if(rstn == `RstEnable)
             rs2_data_o = `ZeroReg ;
-        else 
+        else if(wen == `WriteEnable && wr_addr_i == rs2_addr_i && rs2_read_i == `ReadEnable)
+            rs2_data_o = wr_data_i;
+        else if(rs2_read_i == `ReadEnable)
             rs2_data_o = regs_mem[rs2_addr_i];
+        else 
+            rs2_data_o = `ZeroReg;
     end
 
     //write result

@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-01-01   Deilt           1.0                     Original
-//  
+// 2023-03-14   Deilt           2.0                     v0.1
 // *********************************************************************************
 
 `define CpuResetAddr    32'h0
@@ -64,6 +64,8 @@
 
 // I type inst
 `define INST_TYPE_I 7'b0010011
+
+`define FUNCT3_SIGN_EXPD_IMM 3'000
 `define INST_ADDI   3'b000  //addi rd,rs1,imm            
 `define INST_SLTI   3'b010  //SLTI  slti  rd, rs1, imm   $signed(rs1) < $signed(imm) ? 1 : 0
 `define INST_SLTIU  3'b011  //sltiu sltiu rd, rs1, imm   rs1 < imm ? 1:0
@@ -71,6 +73,7 @@
 `define INST_ORI    3'b110
 `define INST_ANDI   3'b111
 
+`define FUNCT3_SHAMT 3'001
 `define INST_SLLI   3'b001  //逻辑左移 SLLI  slli rd, rs1, imm rd = rs1 << imm (低位补0)
 `define INST_SRLI   3'b101  //逻辑右移 SRLI  srli rd, rs1, imm rd = rs1 >> imm (高位补0)
 `define INST_SRAI   3'b101  //算术右移 符号位填充

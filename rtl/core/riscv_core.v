@@ -128,6 +128,8 @@ module riscv_core(
     );
 
     //id
+    wire                    rs1_read_o;
+    wire                    rs2_read_o;
     id u_id(
         .clk            (clk                ),
         .rstn           (rstn               ),
@@ -137,12 +139,20 @@ module riscv_core(
         .rs2_data_i     (rs2_data_o         ),
         .rs1_addr_o     (rs1_addr_o         ),
         .rs2_addr_o     (rs2_addr_o         ),
+        .rs1_read_o     (rs1_read_o         ),
+        .rs2_read_o     (rs2_read_o         ),
         .inst_o         (id_inst_o          ),
         .instaddr_o     (id_instaddr_o      ),
         .op1_o          (id_op1_o           ),
         .op2_o          (id_op2_o           ),
         .regs_wen_o     (id_regs_wen_o      ),
-        .rd_addr_o      (id_rd_addr_o       )
+        .rd_addr_o      (id_rd_addr_o       ),
+        .ex_wen_i       (ex_regs_wen_o      ),
+        .ex_wr_addr_i   (ex_rd_addr_o       ),
+        .ex_wr_data_i   (ex_rd_data_o       ),
+        .mem_wen_i      (mem_regs_wen_o     ),
+        .mem_wr_addr_i  (mem_rd_addr_o      ),
+        .mem_wr_data_i  (mem_rd_data_o      )        
     );
     //reg
     regfile u_regfile(
@@ -150,6 +160,8 @@ module riscv_core(
         .rstn           (rstn               ),
         .rs1_addr_i     (rs1_addr_o         ),
         .rs2_addr_i     (rs2_addr_o         ),
+        .rs1_read_i     (rs1_read_o         ),
+        .rs2_read_i     (rs2_read_o         ),
         .rs1_data_o     (rs1_data_o         ),
         .rs2_data_o     (rs2_data_o         ),
         .wen            (wb_regs_wen_o      ),
