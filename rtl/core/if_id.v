@@ -18,7 +18,7 @@
 // 2023-03-09   Deilt           1.0                     Original
 //  
 // *********************************************************************************
-`include "defines.v"
+`include "../defines/defines.v"
 module if_id(
     input                   clk         ,
     input                   rstn        ,
