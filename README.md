@@ -22,7 +22,7 @@
 # Deilt_RISC Introduction
 ## 1 feature
 本项目拟设计一个五级流水的单核32位处理器（Deilt_RISC），采用Verilog编写。其具有以下特点：
-- 
+- 工作频率（）？
 - 按序发射按序执行按序写回的五级流水线 
 - 单周期 多周期？？
 - 采用静态预测机制
@@ -94,21 +94,21 @@ Deilt_RISC
 └─ tree.tree                                                                           
 ```
 
-## 4 开发工具
-- VCS
-- Veridi
-- GCC
+## 4 仿真编译环境及工具
+- 系统
+  - CentOS Linux release 7.9.2009 (Core)
+  - Linux version 3.10.0-1160.53.1.el7.x86_64
 
-## 5 仿真环境
-- CentOS Linux release 7.9.2009 (Core)
-- Linux version 3.10.0-1160.53.1.el7.x86_64
-- gcc version 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) 
-- riscv32-unknown-elf-gcc (g) 11.1.0
-- Compiler version = VCS-MX O-2018.09-1
-- Release Verdi_O-2018.09-SP2 for (RH Linux x86_64/64bit)
-- VIM - Vi IMproved 8.2 (2019 Dec 12, compiled May 21 2022 19:29:38)
-- 
-
+- GNU
+  - gcc version 4.8.5 20150623 (Red Hat 4.8.5-44) (GCC) 
+  - riscv32-unknown-elf-gcc (g) 11.1.0
+  - GUN Make 4.2
+- verilog编译仿真
+  - Compiler version = VCS-MX O-2018.09-1
+  - Release Verdi_O-2018.09-SP2 for (RH Linux x86_64/64bit)
+- 其他工具
+  - VIM - Vi IMproved 8.2 (2019 Dec 12, compiled May 21 2022 19:29:38)
+  - TCL 8.5.13
 # 进程
 ## 2023/03/01
 >- 了解了大概的基础知识
