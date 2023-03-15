@@ -52,13 +52,13 @@ module id(
 
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
+    wire [6:0]  funct7 = inst_i[31:25];
     wire [4:0]  rs1    = inst_i[19:15];
     wire [4:0]  rs2    = inst_i[24:20]; //rs2 or shamt,they'r equal
     //wire [4:0]  shamt  = inst_i[24:20]; //rs2 or shamt,they'r equal
     wire [4:0]  rd     = inst_i[11:7];
     wire [11:0] imm    = inst_i[31:20];
     wire [31:0] sign_expd_imm = {{20{inst_i[31]}},inst_i[31:20]};
-    wire [6:0]  funct7 = inst_i[31:25];
 
     reg [`InstBus]              inst_o;
     reg [`InstAddrBus]          instaddr_o;
@@ -117,23 +117,39 @@ module id(
                     `INST_ADDI,`INST_SLTI,`INST_SLTIU,`INST_XORI,`INST_ORI,`INST_ANDI:begin
                         rs1_addr_o = rs1;
                         //rs2_addr_o = `ZeroRegAddr;
-                        op1_o = op1; //rs1_data_i
-                        op2_o = op2;//sign_expd_imm
                         rs1_read_o = `ReadEnable;
                         rs2_read_o = `ReadDisable;
+                        op1_o = op1; //rs1_data_i
+                        op2_o = op2;//sign_expd_imm
                         regs_wen_o = `WriteEnable;
                         rd_addr_o = rd;
                     end
                     `INST_SLLI,`INST_SRLI,`INST_SRAI:begin
                         rs1_addr_o = rs1;
                         //rs2_addr_o = `ZeroRegAddr;
-                        op1_o = op1 ;//rs1_data_i
-                        op2_o = op2 ;//{{27'h0},rs2};(shamt) shamt = rs2
                         rs1_read_o = `ReadEnable;
                         rs2_read_o = `ReadDisable;
+                        op1_o = op1 ;//rs1_data_i
+                        op2_o = op2 ;//{{27'h0},rs2};(shamt) shamt = rs2
                         regs_wen_o = `WriteEnable;
                         rd_addr_o = rd;
                     end
+                    //default
+                endcase
+            end
+            `INST_TYPE_R_M:begin
+                case(funct3)
+                    `INST_ADD_SUB,`INST_SLT,`INST_SLTU,`INST_XOR,`INST_OR,`INST_AND,`INST_SLL,`INST_SRL_SRA:begin
+                        rs1_addr_o = rs1;
+                        rs2_addr_o = rs2;
+                        rs1_read_o = `ReadEnable;
+                        rs2_read_o = `ReadEnable;
+                        op1_o = op1;//rs1_data_i
+                        op2_o = op2;//rs2_data_o
+                        regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
+                    end
+                    //default
                 endcase
             end
             default:begin

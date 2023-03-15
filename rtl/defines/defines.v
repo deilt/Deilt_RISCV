@@ -1,7 +1,7 @@
 // *********************************************************************************
 // Project Name : Deilt_RISCV
-// File Name    : config.v
-// Module Name  : config
+// File Name    : defines.v
+// Module Name  : defines
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
 // Website      : https://github.com/deilt/Deilt_RISC
@@ -16,7 +16,8 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-01-01   Deilt           1.0                     Original
-// 2023-03-14   Deilt           2.0                     v0.1
+// 2023-03-14   Deilt           1.1                     v0.1
+// 2023-03-15   Deilt           1.2                     v0.2
 // *********************************************************************************
 
 `define CpuResetAddr    32'h0
@@ -63,21 +64,36 @@
 `define ReadDisable     1'b0
 
 // I type inst
-`define INST_TYPE_I 7'b0010011
+`define INST_TYPE_I     7'b0010011
 
-`define FUNCT3_SIGN_EXPD_IMM 3'000
-`define INST_ADDI   3'b000  //addi rd,rs1,imm            
-`define INST_SLTI   3'b010  //SLTI  slti  rd, rs1, imm   $signed(rs1) < $signed(imm) ? 1 : 0
-`define INST_SLTIU  3'b011  //sltiu sltiu rd, rs1, imm   rs1 < imm ? 1:0
-`define INST_XORI   3'b100
-`define INST_ORI    3'b110
-`define INST_ANDI   3'b111
+`define INST_ADDI       3'b000  //addi rd,rs1,imm            
+`define INST_SLTI       3'b010  //SLTI  slti  rd, rs1, imm   $signed(rs1) < $signed(imm) ? 1 : 0
+`define INST_SLTIU      3'b011  //sltiu sltiu rd, rs1, imm   rs1 < imm ? 1:0
+`define INST_XORI       3'b100
+`define INST_ORI        3'b110
+`define INST_ANDI       3'b111
 
-`define FUNCT3_SHAMT 3'001
-`define INST_SLLI   3'b001  //逻辑左移 SLLI  slli rd, rs1, imm rd = rs1 << imm (低位补0)
-`define INST_SRLI   3'b101  //逻辑右移 SRLI  srli rd, rs1, imm rd = rs1 >> imm (高位补0)
-`define INST_SRAI   3'b101  //算术右移 符号位填充
+`define INST_SLLI       3'b001  //逻辑左移 SLLI  slli rd, rs1, imm rd = rs1 << imm (低位补0)
+`define INST_SRLI       3'b101  //逻辑右移 SRLI  srli rd, rs1, imm rd = rs1 >> imm (高位补0)
+`define INST_SRAI       3'b101  //算术右移 符号位填充
 // R type inst
+`define INST_TYPE_R_M   7'0110011
+
+`define INST_ADD_SUB    3'b000
+`define INST_SLL        3'b001
+`define INST_SLT        3'b010
+`define INST_SLTU       3'b011
+`define INST_XOR        3'b100
+`define INST_SRL_SRA    3'b101
+//`define INST_SRA        3'b101
+`define INST_OR         3'b110
+`define INST_AND        3'b111
+
+// J type inst
+// B type inst
+// S type inst
+// M Standard extension
+
 
 //JTAG
 
