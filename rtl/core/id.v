@@ -79,7 +79,7 @@ module id(
     wire                        funct3_shamt;
     // 产生扩展立即数判断
     assign funct3_sign_expd_imm = (opcode == `INST_TYPE_I && (funct3 == `INST_ADDI || funct3 == `INST_SLTI || funct3 == `INST_SLTIU || 
-                                    funct3 == `INST_XORI || funct3 == `INST_ORI || funct3 == INST_ANDI));
+                                    funct3 == `INST_XORI || funct3 == `INST_ORI || funct3 == `INST_ANDI));
     
     //产生位移扩展判断
     assign funct3_shamt = (opcode == `INST_TYPE_I && (funct3 == `INST_SLLI || funct3 == `INST_SRLI));
@@ -93,8 +93,8 @@ module id(
     assign op2 = ((rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i) ? ex_wr_data_i :
                  ((rs2_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs2_addr_o == mem_wr_addr_i) ? mem_wr_data_i :
                  (rs2_read_o == `ReadEnable ? rs2_data_i : 
-                 ((`rs2_read_o == `ReadDisable && funct3_sign_expd_imm == 1'b1) ? sign_expd_imm :
-                 ((`rs2_read_o == `ReadDisable && funct3_shamt) ?   ({{27'h0},rs2}) : `ZeroWord)))));
+                 ((rs2_read_o == `ReadDisable && funct3_sign_expd_imm == 1'b1) ? sign_expd_imm :
+                 ((rs2_read_o == `ReadDisable && funct3_shamt) ?   ({{27'h0},rs2}) : `ZeroWord)))));
 
 
     //decode
@@ -128,7 +128,7 @@ module id(
                         rs1_addr_o = rs1;
                         //rs2_addr_o = `ZeroRegAddr;
                         op1_o = op1 ;//rs1_data_i
-                        op2_o = op2//{{27'h0},rs2};(shamt) shamt = rs2
+                        op2_o = op2 ;//{{27'h0},rs2};(shamt) shamt = rs2
                         rs1_read_o = `ReadEnable;
                         rs2_read_o = `ReadDisable;
                         regs_wen_o = `WriteEnable;
