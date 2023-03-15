@@ -18,8 +18,10 @@
 > - 《自己动手写cpu》
 > -  [蜂鸟e203开源risc-v](https://github.com/deilt/e200_opensource)
 
-
 # Deilt_RISC Introduction
+
+设计文档请参考（记录设计时的过程，想法，及问题解决等）：[./Arch/DEILT_RISC_SPEC.md](https://github.com/deilt/Deilt_RISC/blob/main/Arch/DEILT_RISC_SPEC.md)
+
 ## 1 feature
 本项目拟设计一个五级流水的单核32位处理器（Deilt_RISC），采用Verilog编写。其具有以下特点：
 - 按序发射按序执行按序写回的五级流水线 
@@ -73,9 +75,12 @@
 >- 完成ADD相关i型指令验证
 >- 撰写设计相关文档
 
+## 2023/03/13-2023/03/15
 
-## 2023/03/13-
->- 解决数据冲突
->- 完成R型指令的数据通路
->- 完成B，J型指令的数据通路
->- 
+>- 在文档中（DEILT_RISCV_SPEC）中添加流水线冒险的情况与解决方案（03/14）
+>
+>- 完成rtl代码应对流水线冒险的功能
+>
+>- 撰写简单的流水线测试指令用于测试
+>
+>- 完成通过流水线冒险编译仿真测试
