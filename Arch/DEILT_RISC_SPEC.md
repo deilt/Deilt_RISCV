@@ -62,12 +62,16 @@
 
 
 
-# 2 搭建数据通路
-## 1 I 型指令的实现
+# 2 搭建数据通路（RV32I，Base Integer Instructions，40条）
+
+![image-20230315163017147](attachment/inst_AA.png)
+
+## 2.1 I 型指令的实现
 ### I型指令介绍
 ![](attachment/inst.png)
 ![](attachment/i.png)
 ![](attachment/i_opcode.png)
+
 - I型指令通常包括
 	- opcode（操作码，7）
 	- funct3（功能码，3）
@@ -77,7 +81,7 @@
 	- shamt（位移次数，5）(因为是32位数据，所以最多只能位移32次，5位位宽即可)
 	其中opcode用于判断指令的类型；func3用于判断具体指令需要进行的操作；rs1是需要访问通用寄存器的地址，将取到的值用于运算操作；rd是将运算结果写回的目的寄存器地址，立即数是进行运算操作的数，这里直接给出，可以直接扩展后使用，不需要访问寄存器取值。
 
-通过上图我们可以看到I型指令有9种类型。下面我会一一解释。
+通过上图我们可以看到I型指令的其中9种类型。下面我会一一解释。
 
 ```
 `ADDI`
@@ -450,3 +454,423 @@ endmodule
 ##### 测试结果
 
 ![image-20230315152157900](attachment/pipeline_adv_sim.png)
+
+## 2.2 R型指令的实现
+
+### R型指令介绍
+
+![](attachment/inst.png)
+
+![image-20230315155912021](attachment/r_inst.png)
+
+![image-20230315161930941](attachment/r_inst_opcode.png)
+
+R型指令通常包括
+
+- opcode（操作码，7）
+- funct3（功能码，3）
+- rs1（源寄存器1，5）
+- rs2（源寄存器1，5）
+- rd（目标寄存器，5）
+- funct7（功能码，7）
+  其中opcode用于判断指令的类型与M拓展指令相同（0110011）；funct7用于进一步分辨是R型还是M拓展指令，func3用于判断具体指令需要进行的操作；rs1是需要访问通用寄存器的地址，将取到的值用于运算操作；rs2也是需要访问通用寄存器的地址，将取到的值用于运算操作；rd是将运算结果写回的目的寄存器地址。
+
+
+
+通过上图我们可以看到R型指令有10种类型。下面我会一一解释。
+
+```c
+`ADD`
+- ADD rd，rs1，rs2
+- x[rd] = x[rs1] + x[rs2]
+- 将rs1寄存器的值加上rs2寄存器的值，然后将结果写入rd寄存器里，忽略算术溢出。
+```
+
+```
+`SUB`(subtract)
+- sub rd, rs1, rs2
+- x[rd] = x[rs1] - x[rs2]
+- 将rs1寄存器的值减去rs2寄存器的值，然后将结果写入rd寄存器里，忽略算术溢出。
+```
+
+```c
+`SLL`（shift left logical）
+- sll rd, rs1, rs2
+- x[rd] = x[rs1] << x[rs2]
+- 将rs1左移rs2位(低5位有效)，空出的位补0，结果写入rd寄存器。
+```
+
+```
+`SLT`（set less than）
+- slt rd, rs1, rs2
+- x[rd] = (x[rs1] <  x[rs2])? 1:0
+- 将rs1的值与rs2的值比较(有符号数比较)，如果rs1的值更小，则向rd寄存器写1，否则写0。
+```
+
+```c
+`SLTU`（set less than unsigned）
+- sltu rd, rs1, rs2
+- x[rd] = (x[rs1] <  x[rs2])? 1:0
+- 将rs1的值与rs2的值比较(无符号数比较)，如果rs1的值更小，则向rd寄存器写1，否则写0。
+```
+
+```
+`XOR`（exclusive or）
+- xor rd, rs1, rs2
+- x[rd] = x[rs1] ^ x[rs2]
+- 将rs1与rs2按位异或，结果写入rd寄存器
+```
+
+```c
+`SRL`（shift right logical）
+- srl rd, rs1, rs2
+- x[rd] = x[rs1] >> x[rs2]
+- 将rs1右移rs2位(低5位有效)，空出的位补0，结果写入rd寄存器。
+```
+
+```
+`SRA`（shift right arithmetic）
+- sra rd, rs1, rs2
+- x[rd] = x[rs1] >> x[rs2]
+- 将rs1右移rs2位(低5位有效)，空出的位用rs1的最高位补充，结果写入rd寄存器。
+```
+
+```c
+`OR`（or）
+- or rd, rs1, rs2
+- x[rd] = x[rs1] | x[rs2]
+- 将rs1与rs2按位或，结果写入rd寄存器
+```
+
+```
+`AND`（and）
+- and rd, rs1, rs2
+- x[rd] = x[rs1] + x[rs2]
+- 将rs1与rs2按位与，结果写入rd寄存器。
+```
+
+
+
+### R型指令数据通路图
+
+### verilog代码实现
+
+### 编译仿真结果
+
+
+
+## 2.3 跳转指令的实现(JAL=J型,JALR=I型)
+
+### 跳转指令介绍
+
+<img src="attachment/inst.png" />
+
+![image-20230315162045939](attachment/j_inst.png)
+
+![image-20230315162121675](attachment/j_inst_opcode.png)
+
+跳转指令通常包括
+
+- opcode（操作码，7）
+
+- funct3（功能码，3）
+
+- rs1（源寄存器1，5）
+
+- rd（目标寄存器，5）
+
+- Imm（立即数，12）
+
+  其中opcode用于判断指令的类型，func3用于判断具体指令需要进行的操作；rs1是需要访问通用寄存器的地址，将取到的值用于运算操作；rd是将运算结果写回的目的寄存器地址;IMM立即数是进行运算操作的数，这里直接给出，可以直接扩展后使用，不需要访问寄存器取值。
+
+  
+
+通过上图我们可以看到跳转指令有2种类型。下面我会一一解释。
+
+```c
+`JAL`(jump and link)
+- JAL rd，offset  /   JAL rd，imm
+- x[rd] = pc+4; pc += sext(offset)   /   x[rd] = pc+4; pc += imm
+- 把下一条指令的地址(PC+4)存入rd寄存器中，然后把PC设置为当前值加上符号位扩展的偏移量
+```
+
+```
+`JALR`(jump and link reg)
+- JALR rd，offset(rs1)   /   JALR rd，(imm)rs1
+- x[rd] = pc+4; pc = rs1 + offset   /   x[rd] = pc+4; pc = rs1 + imm
+- 将PC设置为rs1寄存器中的值加上符号位扩展的偏移量，把计算出地址的最低有效位设为0，并将原PC+4的值写入rd寄存器.如果不需要目的寄存器，可以将rd设置为x0。
+- 将最低有效位设置为0的原因是为了保证跳转地址是4字节对齐的，因为RISCV 32位的指令长度都是4字节的.
+```
+
+
+
+### 跳转指令数据通路图
+
+### verilog代码实现
+
+### 编译仿真结果
+
+
+
+## 2.4 B型指令的实现
+
+### B型指令介绍
+
+![](attachment/inst.png)
+
+![image-20230315162208139](attachment/b_inst.png)
+
+![image-20230315162238865](attachment/b_inst_opcode.png)
+
+
+
+B型指令通常包括
+
+- opcode（操作码，7）
+
+- funct3（功能码，3）
+
+- rs1（源寄存器1，5）
+
+- rs2（源寄存器1，5）
+
+- Imm（立即数，12）
+
+  其中opcode用于判断指令的类型，func3用于判断具体指令需要进行的操作；rs1是需要访问通用寄存器的地址，将取到的值用于运算操作；rs2也是需要访问通用寄存器的地址，将取到的值用于运算操作；;IMM立即数是进行运算操作的数，这里直接给出，可以直接扩展后使用，不需要访问寄存器取值。
+
+  
+
+通过上图我们可以看到分支指令有6种类型。下面我会一一解释。imm/offset
+
+```c
+`BEQ`(相等时分支跳转 (Branch if Equal))
+- beq rs1, rs2, imm/(offset) 
+- if (rs1 == rs2) pc += imm
+- 若寄存器 x[rs1]和寄存器 x[rs2]的值相等，把pc的值设为当前值加上符号位扩展的偏移 imm (offset)。
+```
+
+```c
+`BNE`(不相等时分支跳转 (Branch if Not Equal))
+- bne rs1, rs2, imm
+- if (rs1 ≠ rs2) pc += imm
+- 若寄存器 x[rs1]和寄存器 x[rs2]的值不相等，把 pc 的值设为当前值加上符号位扩展的偏移imm。
+```
+
+```c
+`BLT`(小于时分支跳转 (Branch if Less Than))
+- blt rs1, rs2, imm
+- if (rs1 <s rs2) pc += imm
+- 若寄存器 x[rs1]的值小于寄存器 x[rs2]的值（均视为二进制补码），把 pc 的值设为当前值加上符号位扩展的偏移 imm
+```
+
+```c
+`BGE`(大于等于时分支跳转(Branch if Greater Than or Equal))
+- bge rs1, rs2, imm
+- if (rs1 ≥s rs2) pc += imm
+- 若寄存器 x[rs1]的值大于等于寄存器 x[rs2]的值（均视为二进制补码），把 pc 的值设为当前值加上符号位扩展的偏移imm。
+```
+
+```c
+`BLTU`(无符号小于时分支跳转 (Branch if Less Than, Unsigned))
+- bltu rs1, rs2, imm
+- if (rs1 <u rs2) pc += imm
+- 若寄存器 x[rs1]的值小于寄存器 x[rs2]的值（均视为无符号数），把 pc 的值设为当前值加上符号位扩展的偏移 imm。
+```
+
+```c
+`BGEU`(无符号大于等于时分支跳转 (Branch if Greater Than or Equal, Unsigned))
+- bgeu rs1, rs2, imm
+- if (rs1 ≥u rs2) pc += imm
+- 若寄存器 x[rs1]的值大于等于寄存器 x[rs2]的值（均视为无符号数），把 pc 的值设为当前值加上符号位扩展的偏移 imm。
+```
+
+
+
+
+
+### B型指令数据通路图
+
+### verilog代码实现
+
+### 编译仿真结果
+
+
+
+## 2.5 访存指令的实现(sotore = S型，load=I型)
+
+### 访存指令介绍
+
+![](attachment/inst.png)
+
+![image-20230315162344305](attachment/s_inst.png)
+
+![image-20230315162327221](attachment/s_inst_opcode.png)
+
+访存指令store(S型)通常包括,load属于I型
+
+- opcode（操作码，7）
+
+- funct3（功能码，3）
+
+- rs1（源寄存器1，5）
+
+- rs2（源寄存器1，5）
+
+- Imm（立即数，13）
+
+  其中opcode用于判断指令的类型，func3用于判断具体指令需要进行的操作；rs1是需要访问通用寄存器的地址，将取到的值用于运算操作；rs2也是需要访问通用寄存器的地址，将取到的值用于运算操作；;IMM立即数是进行运算操作的数，这里直接给出，可以直接扩展后使用，不需要访问寄存器取值。
+
+  
+
+通过上图我们可以看到访存指令有8种类型。下面我会一一解释。offset=imm
+
+```c
+`LB`(字节加载 (Load Byte))
+- lb rd, offset(rs1)
+- x[rd] = sext(M[x[rs1] + sext(offset)][7:0])
+- 从地址 x[rs1] + sign-extend(offset)读取一个字节，经符号位扩展后写入x[rd]。
+```
+
+```c
+`LH`(半字加载 (Load Halfword))
+- lh rd, offset(rs1)
+- x[rd] = sext(M[x[rs1] + sext(offset)][15:0])
+- 从地址 x[rs1] + sign-extend(offset)读取两个字节，经符号位扩展后写入 x[rd]。
+```
+
+```c
+`LW`(字加载 (Load Word))
+- lw rd, offset(rs1)
+- x[rd] = sext(M[x[rs1] + sext(offset)][31:0])
+- 从地址 x[rs1] + sign-extend(offset)读取四个字节，写入 x[rd]。
+```
+
+```c
+`LBU`(无符号字节加载 (Load Byte, Unsigned))
+- lbu rd, offset(rs1)
+- x[rd] = M[x[rs1] + sext(offset)][7:0]
+- 从地址 x[rs1] + sign-extend(offset)读取一个字节，经零扩展后写入 x[rd]。
+```
+
+```c
+`LHU`(无符号半字加载 (Load Halfword, Unsigned))
+- lhu rd, offset(rs1)
+- x[rd] = M[x[rs1] + sext(offset)][15:0]
+- 从地址 x[rs1] + sign-extend(offset)读取两个字节，经零扩展后写入 x[rd]。
+```
+
+```c
+`SB`(存字节(Store Byte))
+- sb rs2, offset(rs1) 
+- M[x[rs1] + sext(offset)] = x[rs2][7: 0]
+- 将 x[rs2]的低位字节存入内存地址 x[rs1]+sign-extend(offset)。
+```
+
+```c
+`SH`(存半字(Store Halfword))
+- sh rs2, offset(rs1)
+- M[x[rs1] + sext(offset) = x[rs2][15: 0]
+- 将 x[rs2]的低位 2 个字节存入内存地址 x[rs1]+sign-extend(offset)。
+```
+
+```c
+`SW`(存字(Store Word))
+- sw rs2, offset(rs1)
+- M[x[rs1] + sext(offset) = x[rs2][31: 0]
+- 将 x[rs2]的低位 4 个字节存入内存地址 x[rs1]+sign-extend(offset)。
+```
+
+
+
+### 访存指令数据通路图
+
+### verilog代码实现
+
+### 编译仿真结果
+
+
+
+# 3 搭建数据通路（RV32M Standard Extension，8条）
+
+### M拓展指令介绍
+
+![](attachment/inst.png)
+
+![image-20230315161637824](attachment/rv32m_e.png)
+
+- M拓展指令通常包括
+  - opcode（操作码，7）
+  - funct3（功能码，3）
+  - rs1（源寄存器1，5）
+  - rs2（源寄存器1，5）
+  - rd（目标寄存器，5）
+  - funct7（功能码，7）
+    其中opcode用于判断指令的类型与R型指令相同（0110011）；funct7用于进一步分辨是R型还是M拓展指令，func3用于判断具体指令需要进行的操作；rs1是需要访问通用寄存器的地址，将取到的值用于运算操作；rs2也是需要访问通用寄存器的地址，将取到的值用于运算操作；rd是将运算结果写回的目的寄存器地址。
+
+通过上图我们可以看到M拓展指令有8种类型。下面我会一一解释。
+
+```c
+`MUL`（乘(Multiply)）
+- mul rd, rs1, rs2
+- x[rd] = x[rs1] × x[rs2]
+- 把寄存器 x[rs2]乘到寄存器 x[rs1]上，乘积写入 x[rd]。忽略算术溢出。
+```
+
+```
+`MULH`（高位乘(Multiply High)）
+- mulh rd, rs1, rs2
+- x[rd] = (x[rs1] s ×s x[rs2]) ≫s XLEN
+- 把寄存器 x[rs2]乘到寄存器 x[rs1]上，都视为 2 的补码，将乘积的高位写入 x[rd]。
+```
+
+```
+`MULHU`（高位无符号乘(Multiply High Unsigned)）
+- mulhu rd, rs1, rs2
+- x[rd] = (x[rs1]u ×u x[rs2]) ≫u XLEN
+- 把寄存器 x[rs2]乘到寄存器 x[rs1]上， x[rs1]、 x[rs2]均为无符号数，将乘积的高位写入 x[rd]。
+```
+
+```
+`MULHSU`（高位有符号-无符号乘(Multiply High Signed-Unsigned)）
+- mulhsu rd, rs1, rs2
+- x[rd] = (x[rs1]u ×s x[rs2]) ≫s XLEN
+- 把寄存器 x[rs2]乘到寄存器 x[rs1]上， x[rs1]为 2 的补码， x[rs2]为无符号数，将乘积的高位写入 x[rd]
+```
+
+```
+`DIV`（除法(Divide)）
+- div rd, rs1, rs2 
+- x[rd] = x[rs1] ÷s x[rs2]
+- 用寄存器 x[rs1]的值除以寄存器 x[rs2]的值，向零舍入，将这些数视为二进制补码，把商写入 x[rd]。
+```
+
+```
+`DIVU`（无符号除法(Divide, Unsigned)）
+- divu rd, rs1, rs2
+- x[rd] = x[rs1] ÷u x[rs2]
+- 用寄存器 x[rs1]的值除以寄存器 x[rs2]的值，向零舍入，将这些数视为无符号数，把商写入x[rd]。
+```
+
+```
+`REM`(求余数(Remainder))
+- rem rd, rs1, rs2
+- x[rd] = x[rs1] %s x[rs2]
+- x[rs1]除以 x[rs2]，向 0 舍入，都视为 2 的补码，余数写入 x[rd]。
+```
+
+```
+`REMU`(求无符号数的余数(Remainder, Unsigned))
+- remu rd, rs1, rs2
+- x[rd] = x[rs1] %u x[rs2]
+- x[rs1]除以 x[rs2]，向 0 舍入，都视为无符号数，余数写入 x[rd]。
+```
+
+### 指令数据通路图
+
+
+
+### verilog代码实现
+
+
+
+### 编译仿真结果
