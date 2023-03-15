@@ -69,5 +69,3 @@ module core_tb;
     //stop
 
 endmodule
-
-endmodule
