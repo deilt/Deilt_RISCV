@@ -119,6 +119,7 @@ module ex(
     `ifndef SRA_NOT
         //srai_logi = (op1_i >> shamt) | (({32{op1_i[31]}}) & ~((32'hffffffff) >> shamt));
         sra_arith = (sr_shift) | (({32{op1_i[31]}}) & ~(sr_shift_mask));
+
     `endif  
 
     //assign sri_shift        = op1_i >> inst_i[24:20]; //op1_i >> shamt

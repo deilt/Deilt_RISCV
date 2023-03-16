@@ -1,7 +1,7 @@
 // *********************************************************************************
 // Project Name : Deilt_RISCV
-// File Name    : mem.v
-// Module Name  : mem
+// File Name    : mem_wb.v
+// Module Name  : mem_wb
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
 // Website      : https://github.com/deilt/Deilt_RISC
@@ -19,31 +19,47 @@
 //  
 // *********************************************************************************
 `include "../defines/defines.v"
-module mem(
+module mem_wb(
     input                       clk             ,
     input                       rstn            ,
-    //from ex_mem
+    //from mem
     input[`InstBus]             inst_i          ,
     input[`InstAddrBus]         instaddr_i      ,
 
     input                       regs_wen_i      ,
     input[`RegAddrBus]          rd_addr_i       ,
     input[`RegBus]              rd_data_i       ,
-    //from ram
-    input[`MemBus]              mem_data_i      ,
-    //to mem_wb
+    //inst
     output[`InstBus]            inst_o          ,
     output[`InstAddrBus]        instaddr_o      ,
+    //to regs
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
-    output[`RegBus]             rd_data_o       
+    output[`RegBus]             rd_data_o       ,
+    input                       lden
 );
-    wire [6:0]  opcode = inst_i[6:0];
-    assign rd_data_o = (opcode == `INST_TYPE_I || opcode == `INST_TYPE_R_M)?  rd_data_i : mem_data_i;
-    //assign rd_data_o = (opcode != `INST_TYPE_LOAD)?  rd_data_i : mem_data_i;
+    //inst dff
+    reg [`InstBus]          inst_r;
+    gnrl_dfflrd #(32) inst_gnrl_dfflrd(clk,rstn,lden,`INST_NOP,inst_i,inst_r);
+    assign inst_o = inst_r ;
 
-    assign regs_wen_o   = regs_wen_i;
-    assign rd_addr_o    = rd_addr_i;
-    assign inst_o       = inst_i;
-    assign instaddr_o   = instaddr_i;
+    //instaddr dff
+    reg [`InstAddrBus]      instaddr_r;
+    gnrl_dfflr #(32) instaddr_gnrl_dfflr(clk,rstn,lden,instaddr_i,instaddr_r);
+    assign instaddr_o = instaddr_r;
+    
+    //regs_wen
+    reg                     regs_wen_r;
+    gnrl_dfflr #(1) regs_wen_gnrl_dfflr(clk,rstn,lden,regs_wen_i,regs_wen_r);
+    assign regs_wen_o = regs_wen_r;
+
+    //rd_addr
+    reg [`RegAddrBus]       rd_addr_r;
+    gnrl_dfflr #(`RegAddrWidth) rd_addr_gnrl_dfflr(clk,rstn,lden,rd_addr_i,rd_addr_r);
+    assign rd_addr_o = rd_addr_r;
+
+    //rd_data
+    reg [`RegBus]           rd_data_r;
+    gnrl_dfflr #(`RegWidth) rd_data_gnrl_dfflr(clk,rstn,lden,rd_data_i,rd_data_r);
+    assign rd_data_o = rd_data_r;    
 endmodule
