@@ -62,7 +62,7 @@ module riscv_core(
     wire                        ex_regs_wen_o;
     wire [`RegAddrBus]          ex_rd_addr_o;
     wire [`RegBus]              ex_rd_data_o;
-
+    wire                        ex_hold_flag_o;
     //ex_mem
     wire [`InstBus]             ex_mem_inst_o;
     wire [`InstAddrBus]         ex_mem_instaddr_o;
@@ -98,10 +98,23 @@ module riscv_core(
     wire                        wb_regs_wen_o;
     wire [`RegAddrBus]          wb_rd_addr_o;
     wire [`RegBus]              wb_rd_data_o;
+    //ctrl
+    wire [4:0]                  hold_en_o;
+
+    //ctrl
+    ctrl u_ctrl(
+        .clk           (clk           ),
+        .rstn          (rstn          ),
+        .ex_hold_flag_i(ex_hold_flag_o),
+        .hold_en_o     (hold_en_o     )
+    );
+
     //pc
     pc u_pc(
-        .clk            (clk ),
-        .rstn           (rstn),
+        .clk            (clk        ),
+        .rstn           (rstn       ),
+        .hold_en_i      (hold_en_o  ),
+        .ex_instaddr_i  (ex_instaddr_o),
         .pc             (pc  )
     );
 
@@ -124,7 +137,7 @@ module riscv_core(
         .instaddr_i     (pc              ),
         .inst_o         (if_id_inst_o    ),
         .instaddr_o     (if_id_instaddr_o),
-        .lden           (1'b1            )  
+        .hold_en_i      (hold_en_o       )  
     );
 
     //id
@@ -185,7 +198,7 @@ module riscv_core(
         .op2_o          (id_ex_op2_o        ),
         .regs_wen_o     (id_ex_regs_wen_o   ),
         .rd_addr_o      (id_ex_rd_addr_o    ),
-        .lden           (1'b1               )        
+        .hold_en_i      (hold_en_o          )        
     );
 
     //ex
@@ -207,7 +220,8 @@ module riscv_core(
         .mem_addr_o     (mem_addr_o         ), 
         .regs_wen_o     (ex_regs_wen_o      ), 
         .rd_addr_o      (ex_rd_addr_o       ), 
-        .rd_data_o      (ex_rd_data_o       ) 
+        .rd_data_o      (ex_rd_data_o       ),
+        .hold_flag_o    (ex_hold_flag_o     ) 
     );
 
     //ex_mem
@@ -234,7 +248,7 @@ module riscv_core(
         .regs_wen_o     (ex_mem_regs_wen_o  ),
         .rd_addr_o      (ex_mem_rd_addr_o   ),
         .rd_data_o      (ex_mem_rd_data_o   ),
-        .lden           (1'b1               )
+        .hold_en_i      (hold_en_o          )
     );
 
     //mem
@@ -279,7 +293,7 @@ module riscv_core(
         .regs_wen_o     (mem_wb_regs_wen_o  ),
         .rd_addr_o      (mem_wb_rd_addr_o   ),
         .rd_data_o      (mem_wb_rd_data_o   ),
-        .lden           (1'b1)
+        .hold_en_i      (hold_en_o          )
     );
 
     //wb

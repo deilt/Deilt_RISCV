@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-09   Deilt           1.0                     Original
-//  
+// 2023-03-17   Deilt           1.1
 // *********************************************************************************
 `include "../defines/defines.v"
 module if_id(
@@ -30,9 +30,13 @@ module if_id(
     //to id
     output[`InstBus]        inst_o      ,
     output[`InstAddrBus]    instaddr_o  ,
-
-    input                   lden
+    //from ctrl
+    input[4:0]              hold_en_i
 );
+
+    wire                    lden ;
+    assign lden = hold_en_i[1];
+
     //inst dff
     reg [`InstBus]          inst_r;
     gnrl_dfflrd #(32) inst_gnrl_dfflrd(clk,rstn,lden,`INST_NOP,inst_i,inst_r);

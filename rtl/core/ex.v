@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-10   Deilt           1.0                     Original
-//  
+// 2023-03-17   Deilt           1.1 
 // *********************************************************************************
 `include "../defines/defines.v"
 module ex(
@@ -41,7 +41,9 @@ module ex(
 
     output                          regs_wen_o  ,
     output[`RegAddrBus]             rd_addr_o   ,
-    output[`RegBus]                 rd_data_o   
+    output[`RegBus]                 rd_data_o   ,
+    //to ctrl
+    output                          hold_flag_o
 
 );
     reg [`InstBus]              inst_o;

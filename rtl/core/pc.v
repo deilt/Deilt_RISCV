@@ -16,13 +16,17 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-09   Deilt           1.0                     Original
-//  
+// 2023-03-17   Deilt           1.1                     
 // *********************************************************************************
 `include "../defines/defines.v"
 
 module pc(
-    input               clk         ,
-    input               rstn        ,
+    input               clk             ,
+    input               rstn            ,
+    //from ctrl
+    input[4:0]          hold_en_i       ,
+    input[`InstAddrBus] ex_instaddr_i   ,
+
     output[`InstAddrBus] pc          
 );
     reg [`InstAddrBus]  pc ;
@@ -31,8 +35,11 @@ module pc(
         if(rstn == `RstEnable)begin
             pc <= `CpuResetAddr ; //reset to 32'h0
         end
+        else if(hold_en_i[0])begin
+            pc <= ex_instaddr_i + 4'h4;
+        end
         else begin
-            pc <= pc + 4 ; //4byte equeal to 32bits
+            pc <= pc + 4'h4 ; //4byte equeal to 32bits
         end
     end
 

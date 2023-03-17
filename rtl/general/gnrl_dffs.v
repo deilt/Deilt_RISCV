@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-02-22   Deilt           1.0                     Original
-//  
+// 2023-03-17   Deilt           1.1
 // *********************************************************************************
 
 // ===========================================================================
@@ -42,7 +42,10 @@ module gnrl_dfflrd#(
         if(!rstn)
             qout_r <= default_vlu ;
         else if(lden == 1'b1)
-            qout_r <= #1 dnxt     ;
+            qout_r <= dnxt     ;
+            //qout_r <= #1 dnxt     ;
+        else
+            qout_r <= default_vlu ;
     end
 
     assign qout = qout_r ;
@@ -82,7 +85,10 @@ module gnrl_dfflrs#(
         if(!rstn)
             qout_r <= {DW{1'b1}} ;
         else if(lden == 1'b1)
-            qout_r <= #1 dnxt    ;
+            qout_r <= dnxt    ;
+            //qout_r <= #1 dnxt    ;
+        else
+            qout_r <= {DW{1'b1}} ;
     end
 
     assign qout = qout_r ;
@@ -122,7 +128,9 @@ module gnrl_dfflr#(
         if(!rstn)
             qout_r <= {DW{1'b0}} ;
         else if(lden == 1'b1)
-            qout_r <= #1 dnxt    ;
+            qout_r <= dnxt    ;
+        else 
+            qout_r <= {DW{1'b0}} ;
     end
 
     assign qout = qout_r ;

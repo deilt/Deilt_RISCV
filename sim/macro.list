@@ -1,7 +1,7 @@
 //宏定义
-+define+COUNTER_FREE
+//+define+COUNTER_FREE
 //带有值的宏定义
-+define+CNT_FREE=9
+//+define+CNT_FREE=9
 //指定库文件，建议包含路径，可指定多个
 //-v <filename>
 //指定库文件、IP 等 Verilog 模型的路径，可指定多个

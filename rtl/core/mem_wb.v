@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-10   Deilt           1.0                     Original
-//  
+// 2023-03-17   Deilt           1.1
 // *********************************************************************************
 `include "../defines/defines.v"
 module mem_wb(
@@ -36,8 +36,13 @@ module mem_wb(
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
     output[`RegBus]             rd_data_o       ,
-    input                       lden
+    //from ctrl
+    input[4:0]                  hold_en_i
 );
+
+    wire                    lden ;
+    assign lden = hold_en_i[4];
+
     //inst dff
     reg [`InstBus]          inst_r;
     gnrl_dfflrd #(32) inst_gnrl_dfflrd(clk,rstn,lden,`INST_NOP,inst_i,inst_r);

@@ -614,7 +614,7 @@ R型指令通常包括
 
 为了实现流水线暂停机制，对系统结构作了如下修改。
 
-![image-20230317150851381](attachment/pipeline_ctrl.png)
+<img src="attachment/pipeline_ctrl.png" alt="image-20230317150851381" style="zoom:150%;" />
 
 执行阶段向CTRL模块发出流水线暂停请求，由CTRL模块产生流水线暂停信号，输出到PC、IF/ID、ID/EX、EX/MEM、MEM/WB等模块，从而控制PC的值，以及流水线各个阶段的寄存器。
 
@@ -629,7 +629,15 @@ R型指令通常包括
 
 ### RTL实现
 
-
+- 添加ctrl模块
+  - hold_en[0]表示PC地址是否保持不变，１表示不变
+  - hold_en[1]表示if_id阶段是否暂停，１表示暂停
+  - hold_en[2]表示id_ex阶段是否暂停，１表示暂停
+  - hold_en[3]表示ex_mem阶段是否暂停，１表示暂停
+  - hold_en[4]表示mem_wb阶段是否暂停，１表示暂停
+- 修改pc, ex, if_id, id_ex, ex_mem, mem_wb模块
+- 修改riscv_core
+- 代码请参考rtl_history/rtl_20230317_ctrl
 
 ### 编译仿真结果
 

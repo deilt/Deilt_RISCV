@@ -16,7 +16,7 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-10   Deilt           1.0                     Original
-//  
+// 2023-03-17   Deilt           1.1
 // *********************************************************************************
 `include "../defines/defines.v"
 module id_ex(
@@ -36,9 +36,12 @@ module id_ex(
     output[`RegBus]                 op2_o       ,
     output                          regs_wen_o  ,
     output[`RegAddrBus]             rd_addr_o   ,
-
-    input                           lden        //always 1,for now          
+    //from ctrl
+    input[4:0]                      hold_en_i        //always 1,for now          
 );
+    wire                    lden ;
+    assign lden = hold_en_i[2];
+
     //inst dff
     reg [`InstBus]          inst_r;
     gnrl_dfflrd #(32) inst_gnrl_dfflrd(clk,rstn,lden,`INST_NOP,inst_i,inst_r);
