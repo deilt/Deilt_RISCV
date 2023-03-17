@@ -53,7 +53,7 @@ module ex_mem(
     input[4:0]                      hold_en_i                           
 );
     wire                    lden ;
-    assign lden = hold_en_i[3];
+    assign lden = !hold_en_i[3];
 
     //inst dff
     reg [`InstBus]          inst_r;

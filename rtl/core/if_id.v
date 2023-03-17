@@ -35,7 +35,7 @@ module if_id(
 );
 
     wire                    lden ;
-    assign lden = hold_en_i[1];
+    assign lden = !hold_en_i[1];
 
     //inst dff
     reg [`InstBus]          inst_r;

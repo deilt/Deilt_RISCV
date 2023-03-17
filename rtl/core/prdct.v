@@ -19,7 +19,35 @@
 //  
 // *********************************************************************************
 module prdct(
-
+    input                           clk                 ,
+    input                           rstn                ,
+    //from if_id
+    input[`InstBus]                 if_id_inst_i        ,
+    input[`InstAddrBus]             if_id_instaddr_i    ,
+    //to if/pc
+    output                          prd_jump_en_o       ,
+    output[`InstAddrBus]            prd_jump_addr_o     ,
+    //to id
+    //output                          prd_jump_en_o       ,
+    //output[`InstAddrBus]            prd_jump_addr_o     ,
+    
+    //to ctrl
+    //output                          prd_jump_en_o       ,
 );
+    //简单译码(指令是属于普通指令还是分支跳转指令、分支跳转指令的类型和细节)
+    wire [6:0]  opcode = inst_i[6:0];
 
+
+
+    //简单的分支预测 (简单的静态预测,默认向回即后跳转，BTFN)
+    //使用pc的加法器,以节省面积
+    //生成跳转判断
+    //生成跳转地址
+
+
+
+
+    //reg
+    //保存上一次跳转的地址
+    
 endmodule

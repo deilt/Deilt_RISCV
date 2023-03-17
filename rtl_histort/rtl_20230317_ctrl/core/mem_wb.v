@@ -41,7 +41,7 @@ module mem_wb(
 );
 
     wire                    lden ;
-    assign lden = hold_en_i[4];
+    assign lden = !hold_en_i[4];
 
     //inst dff
     reg [`InstBus]          inst_r;

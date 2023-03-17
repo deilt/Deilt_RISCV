@@ -40,7 +40,7 @@ module id_ex(
     input[4:0]                      hold_en_i        //always 1,for now          
 );
     wire                    lden ;
-    assign lden = hold_en_i[2];
+    assign lden = !hold_en_i[2];
 
     //inst dff
     reg [`InstBus]          inst_r;

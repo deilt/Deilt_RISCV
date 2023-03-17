@@ -24,6 +24,10 @@ module ctrl(
     input                           rstn            ,
     //from ex
     input                           ex_hold_flag_i  ,
+
+    //from prd/id
+    input                           prd_jump_en_i   ,//equle to id_hold_flag_i
+
     output[4:0]                     hold_en_o       
 );
     reg [4:0]   hold_en_o;
@@ -33,6 +37,9 @@ module ctrl(
         end
         else if(ex_hold_flag_i)begin
             hold_en_o = 5'b01111;
+        end
+        else if(prd_jump_en_i)begin//因为是预测跳转，那么要将指令推送到ex模块，进行校验，所以id_ex模块不冲刷
+            hold_en_o = 5'b00011;
         end
         else begin
             hold_en_o = 5'b00000;
