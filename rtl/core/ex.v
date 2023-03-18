@@ -25,6 +25,9 @@ module ex(
     //from id_ex
     input[`InstBus]                 inst_i      ,
     input[`InstAddrBus]             instaddr_i  ,
+    input[`RegBus]                  rs1_data_i  ,//add
+    input[`RegBus]                  rs2_data_i  ,//add
+
     input[`RegBus]                  op1_i       ,
     input[`RegBus]                  op2_i       ,
     input                           regs_wen_i  ,
@@ -43,7 +46,12 @@ module ex(
     output[`RegAddrBus]             rd_addr_o   ,
     output[`RegBus]                 rd_data_o   ,
     //to ctrl
-    output                          hold_flag_o
+    output                          ex_hold_flag_o ,//modify
+
+    output                          ex_jump_en_o    ,//add
+    output[`InstAddrBus]            ex_jump_base_o  ,//add
+    output[`InstAddrBus]            ex_jump_ofst_o  ,//add
+    
 
 );
     reg [`InstBus]              inst_o;
@@ -55,6 +63,8 @@ module ex(
     wire [2:0]  funct3 = inst_i[14:12];
     wire [6:0]  funct7 = inst_i[31:25];
     wire [4:0]  shamt  = inst_i[24:20];
+    wire [31:0] sign_expd_imm = {{20{inst_i[31]}},inst_i[31:20]};
+    wire [31:0] sign_expd_binst_imm = {{20{inst_i[31]}},inst_i[30:25],inst_i[11:8],1'b0};
 
     reg [`RegBus]               rd_data;
     wire [`RegBus]              op1_add_op2;
@@ -73,6 +83,8 @@ module ex(
     wire [`RegBus]              sr_shift_mask;
 
     wire [`RegBus]              sl_shift;
+
+    
     //rd_data_o
     assign rd_data_o = rd_data;
 
@@ -140,6 +152,11 @@ module ex(
         instaddr_o = instaddr_i;
         regs_wen_o = regs_wen_i;
         rd_addr_o  = rd_addr_i;
+
+        ex_hold_flag_o = `HoldDisable;
+        ex_jump_en_o   = `JumpDisable;
+        ex_jump_base_o = `CpuResetAddr;
+        ex_jump_ofst_o = `ZeroWord;
         
         case(opcode)
             `INST_TYPE_I:begin
@@ -216,6 +233,28 @@ module ex(
                         rd_data = op1_and_op2;
                     end
                 endcase 
+            end
+            `INST_JAL:begin
+                rd_data = op1_add_op2;//pc+4
+                ex_jump_en_o   = `JumpEnable;
+                ex_jump_base_o = instaddr_i;
+                ex_jump_ofst_o = {{12{inst_i[31]}},inst_i[19:12],inst_i[20],inst_i[30:21],1'b0};//sign_imm
+            end
+            `INST_JALR:begin
+                rd_data = op1_add_op2;//pc+4
+                ex_jump_en_o   = `JumpEnable;
+                ex_jump_base_o = rs1_data_i;
+                ex_jump_ofst_o = sign_expd_imm;//sign_imm
+            end
+            `INST_TYPE_B:begin
+                case(funct3)
+                    `INST_BEQ:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = op1_eq_op2;
+                        ex_jump_base_o = instaddr_i;
+                        ex_jump_ofst_o = sign_expd_binst_imm;
+                    end
+                endcase
             end
             default:begin
                 rd_data = `ZeroWord;

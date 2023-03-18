@@ -27,12 +27,17 @@ module prdct(
     //to if/pc
     output                          prd_jump_en_o       ,
     output[`InstAddrBus]            prd_jump_addr_o     ,
+    //from id  rs1 rs2
+    input[`RegBus]                  rs1_data_i          ,
+    input[`RegBus]                  rs2_data_i          ,
+    
     //to id
     //output                          prd_jump_en_o       ,
     //output[`InstAddrBus]            prd_jump_addr_o     ,
     
     //to ctrl
-    //output                          prd_jump_en_o       ,
+    output                           prd_jump_en_o       
+    
 );
     //简单译码(指令是属于普通指令还是分支跳转指令、分支跳转指令的类型和细节)
     wire [6:0]  opcode = inst_i[6:0];
@@ -47,7 +52,6 @@ module prdct(
 
 
 
-    //reg
-    //保存上一次跳转的地址
+    
     
 endmodule

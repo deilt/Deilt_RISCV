@@ -25,6 +25,10 @@
 `define RstEnable       1'b0 
 `define True            1'b1
 `define False           1'b0
+`define HoldDisable     1'b0
+`define HoldEnable      1'b1
+`define JumpEnable      1'b1
+`define JumpDisable     1'b0
 
 //INST
 `define INST_NOP 32'h00000013
@@ -90,10 +94,22 @@
 `define INST_OR         3'b110
 `define INST_AND        3'b111
 
-// J type inst
+// J/jump type inst
+`define INST_JAL        7'b1101111
+`define INST_JALR       7'b1100111
+
 // B type inst
+`define INST_TYPE_B     7'b1100011
+`define INST_BEQ        3'b000
+`define INST_BNE        3'b001
+`define INST_BLT        3'b100
+`define INST_BGE        3'b101
+`define INST_BLTU       3'b110
+`define INST_BGEU       3'b111
+
 // S type inst
 `define INST_TYPE_S     7'b0100011
+
 // M Standard extension
 
 
