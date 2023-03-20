@@ -254,6 +254,36 @@ module ex(
                         ex_jump_base_o = instaddr_i;
                         ex_jump_ofst_o = sign_expd_binst_imm;
                     end
+                    `INST_BNE:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = !op1_eq_op2;
+                        ex_jump_base_o = instaddr_i;
+                        ex_jump_ofst_o = sign_expd_binst_imm;
+                    end
+                    `INST_BLT:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = !op1_be_op2_signed;
+                        ex_jump_base_o = instaddr_i;
+                        ex_jump_ofst_o = sign_expd_binst_imm;
+                    end
+                    `INST_BGE:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = op1_be_op2_signed;
+                        ex_jump_base_o = instaddr_i;
+                        ex_jump_ofst_o = sign_expd_binst_imm;
+                    end
+                    `INST_BLTU:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = !op1_be_op2_unsigned;
+                        ex_jump_base_o = instaddr_i;
+                        ex_jump_ofst_o = sign_expd_binst_imm;
+                    end
+                    `INST_BGEU:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = op1_be_op2_unsigned;
+                        ex_jump_base_o = instaddr_i;
+                        ex_jump_ofst_o = sign_expd_binst_imm;
+                    end
                 endcase
             end
             default:begin

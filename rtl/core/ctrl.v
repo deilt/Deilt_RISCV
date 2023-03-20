@@ -31,11 +31,11 @@ module ctrl(
     //from prd/id
     input                           prd_jump_en_i   ,//equle to id_hold_flag_i,for pipline flush
     //to pc/if
-    output[`InstAddrBus]            ex_jump_addr_o  ,
+    output[`InstAddrBus]            ex_jump_addr_o  ,   //...................
     output                          prd_fail         ,                          
     //from id_ex
     input                           if_id_jump_en_i ,
-    input[`InstAddrBus]             if_id_prd_jump_addr_i ,//for compare
+    input[`InstAddrBus]             if_id_prd_jump_addr_i ,//for compare  .....................
     
 
     output[4:0]                     hold_en_o       

@@ -27,14 +27,14 @@ module pc(
     input[4:0]          hold_en_i       ,
 
     input               prd_fail         ,
-    input[`InstAddrBus] ex_jump_addr_o  ,
+    input[`InstAddrBus] ex_jump_addr_o  ,//...............
     //from ex
     input[`InstAddrBus] ex_instaddr_i   ,
     input               ex_jump_en_i    ,
 
     //from prd
     input               prd_jump_en_i   ,
-    input[`InstAddrBus] prd_jump_addr_i ,
+    input[`InstAddrBus] prd_jump_addr_i ,//.............
 
     output[`InstAddrBus] pc          
 );
@@ -62,3 +62,4 @@ module pc(
     end
 
 endmodule
+
