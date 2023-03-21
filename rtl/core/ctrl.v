@@ -20,37 +20,34 @@
 // *********************************************************************************
 //`include "../defines/defines.v"
 module ctrl(
-    input                           clk             ,
-    input                           rstn            ,
+    input                           clk                     ,
+    input                           rstn                    ,
     //from ex
-    input                           ex_hold_flag_i  ,
+    input                           ex_hold_flag_i          ,
 
-    input                           ex_jump_en_i    ,
-    input[`InstAddrBus]             ex_jump_base_i  ,
-    input[`InstAddrBus]             ex_jump_ofst_i  ,
+    input                           ex_jump_en_i            ,
+    input[`InstAddrBus]             ex_jump_base_i          ,
+    input[`InstAddrBus]             ex_jump_ofst_i          ,
     //from prd/id
-    input                           prd_jump_en_i   ,//equle to id_hold_flag_i,for pipline flush
+    input                           prd_jump_en_i           ,//equle to id_hold_flag_i,for pipline flush
     //to pc/if
-    output[`InstAddrBus]            ex_jump_addr_o  ,   //...................
-    output                          prd_fail         ,                          
+    output                          prd_fail                ,                          
     //from id_ex
-    input                           if_id_jump_en_i ,
-    input[`InstAddrBus]             if_id_prd_jump_addr_i ,//for compare  .....................
-    
+    input                           id_ex_jump_en_i         ,    
 
     output[4:0]                     hold_en_o       
 );
     reg [4:0]           hold_en_o; 
 
-    assign ex_jump_addr_o = ex_jump_base_o + ex_jump_ofst_o;
+    //assign ex_jump_addr_o = ex_jump_base_o + ex_jump_ofst_o;
 
     //判断预测是否正确
-    //assign prd_sus = ((ex_jump_en_i == `JumpEnable && if_id_jump_en_i == `JumpEnable) && (ex_jump_addr_o == if_id_prd_jump_addr_i));
+    //assign prd_sus = ((ex_jump_en_i == `JumpEnable && id_ex_jump_en_i == `JumpEnable) && (ex_jump_addr_o == if_id_prd_jump_addr_i));
 
     //正确则不需要冲刷流水线
     //不正确则冲刷流水线
-    //assign prd_fail = (ex_jump_en_i ==  `JumpDisable && if_id_jump_en_i == `JumpEnable) || (ex_jump_en_i == `JumpEnable && if_id_jump_en_i == `JumpDisable);
-    assign prd_fail = (ex_jump_en_i != if_id_jump_en_i) ;
+
+    assign prd_fail = (ex_jump_en_i != id_ex_jump_en_i) ;
     
     always @(*) begin
         if(rstn == `RstEnable)begin

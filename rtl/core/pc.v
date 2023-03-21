@@ -25,26 +25,70 @@ module pc(
     input               rstn            ,
     //from ctrl
     input[4:0]          hold_en_i       ,
+    input               prd_fail        ,
 
-    input               prd_fail         ,
-    input[`InstAddrBus] ex_jump_addr_o  ,//...............
     //from ex
     input[`InstAddrBus] ex_instaddr_i   ,
     input               ex_jump_en_i    ,
 
+    input[`InstAddrBus] ex_jump_base_i  ,
+    input[`InstAddrBus] ex_jump_ofset_i ,
+
     //from prd
     input               prd_jump_en_i   ,
-    input[`InstAddrBus] prd_jump_addr_i ,//.............
+    input[`InstAddrBus] prd_jump_base_i ,
+    input[`InstAddrBus] prd_jump_ofset_i,
 
-    output[`InstAddrBus] pc          
+    output[`InstAddrBus] pc_o          
 );
-    reg [`InstAddrBus]  pc ;
+    reg [`InstAddrBus]  pc_o ;
+
+    wire [`InstAddrBus] pc ;
+    wire [`InstAddrBus] base;
+    wire [`InstAddrBus] ofset;
+
+    wire                jump_but_prd_fail;
+    wire                nojump_but_prd_fail_and_just_pause;
+    wire                prd_jump;
+
+    /*assign base = ((prd_fail == 1'b1 && ex_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? ex_jump_base_i :
+                  ((hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable) ?  ex_instaddr_i :
+                  ((prd_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? prd_jump_base_i : 
+                  pc)));
+    assign ofset = ((prd_fail == 1'b1 && ex_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? ex_jump_ofset_i :
+                  ((hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable) ?  4'h4 :
+                  ((prd_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? prd_jump_ofset_i : 
+                  4'h4)));*/
+
+    assign jump_but_prd_fail = (prd_fail == 1'b1 && ex_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable);
+    assign nojump_but_prd_fail_and_just_pause = (hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable) ;
+    assign prd_jump = (prd_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable);
+
+    assign base = (jump_but_prd_fail ? ex_jump_base_i :
+                  (nojump_but_prd_fail_and_just_pause ? ex_instaddr_i :
+                  (prd_jump ? prd_jump_base_i : pc)));
+    
+    assign ofset = (jump_but_prd_fail ? ex_jump_ofset_i :
+                  (nojump_but_prd_fail_and_just_pause ?  4'h4:
+                  (prd_jump ? prd_jump_base_i : 4'h4)));
+
+    assign pc = base + ofset ;
+
 
     always @(posedge clk or negedge rstn) begin
         if(rstn == `RstEnable)begin
+            pc_o <= `CpuResetAddr ; //reset to 32'h0
+        end
+        else begin
+            pc_o = pc ;
+        end
+    end
+
+    /*always @(posedge clk or negedge rstn) begin
+        if(rstn == `RstEnable)begin
             pc <= `CpuResetAddr ; //reset to 32'h0
         end
-        else if(hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable)begin//来自执行阶段的指令暂停,无跳转
+        else if(hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable)begin//来自执行阶段的指令暂停,无跳转及预测失败
             pc <= ex_instaddr_i + 4'h4;
         end
         else if(prd_fail = 1'b1 && ex_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable)begin//ex阶段的跳转，预测失败
@@ -59,7 +103,8 @@ module pc(
         else begin
             pc <= pc + 4'h4 ; //4byte equeal to 32bits
         end
-    end
+    end*/
 
 endmodule
 
+    

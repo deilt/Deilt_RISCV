@@ -24,13 +24,15 @@ module riscv_core(
     input                           rstn
 );
     //pc
-    wire [`InstAddrBus]         pc;
+    wire [`InstAddrBus]         pc_o;
     //rom
     wire [`InstBus]             rom_data_o;
     //if_id
     wire [`InstBus]             if_id_inst_o;
     wire [`InstAddrBus]         if_id_instaddr_o;
     //id
+    wire                        rs1_read_o;
+    wire                        rs2_read_o;
     wire [`RegAddrBus]          rs1_addr_o;
     wire [`RegAddrBus]          rs2_addr_o;
     wire [`InstBus]             id_inst_o;
@@ -49,6 +51,9 @@ module riscv_core(
     wire [`RegBus]              id_ex_op2_o;
     wire                        id_ex_regs_wen_o;
     wire [`RegAddrBus]          id_ex_rd_addr_o;
+    wire [`RegBus]              id_ex_rs1_data_o ;
+    wire [`RegBus]              id_ex_rs2_data_o ;
+    wire                        id_ex_jump_en_o;
     //ex
     wire [`InstBus]             ex_inst_o;
     wire [`InstAddrBus]         ex_instaddr_o;
@@ -63,6 +68,10 @@ module riscv_core(
     wire [`RegAddrBus]          ex_rd_addr_o;
     wire [`RegBus]              ex_rd_data_o;
     wire                        ex_hold_flag_o;
+
+    wire                          ex_jump_en_o;
+    wire[`InstAddrBus]            ex_jump_base_o;
+    wire[`InstAddrBus]            ex_jump_ofset_o;
     //ex_mem
     wire [`InstBus]             ex_mem_inst_o;
     wire [`InstAddrBus]         ex_mem_instaddr_o;
@@ -100,22 +109,66 @@ module riscv_core(
     wire [`RegBus]              wb_rd_data_o;
     //ctrl
     wire [4:0]                  hold_en_o;
+    wire                        prd_fail;
+    //prd
+    wire                        prd_jump_en_o;
+    wire [`InstAddrBus]         prd_jump_base_o;
+    wire [`InstAddrBus]         prd_jump_ofset_o;
+
+
+    //prd
+    prdct u_prdct(
+        .clk              (clk                  ),      
+        .rstn             (rstn                 ),
+        .inst_i           (if_id_inst_o         ),    
+        .instaddr_i       (if_id_instaddr_o     ),
+        .prd_jump_en_o    (prd_jump_en_o        ),
+        .prd_jump_base_o  (prd_jump_base_o      ),
+        .prd_jump_ofset_o (prd_jump_ofset_o     ),
+        .rs1_data_i       (rs1_data_o           ),
+        .rs2_data_i       (rs2_data_o           ),
+        .rs1_addr_i       (rs1_addr_o           ),
+        .rs2_addr_i       (rs2_addr_o           ),
+        .rs1_read_i       (rs1_read_o           ),
+        .rs2_read_i       (rs2_read_o           ),
+        .ex_wen_i         (ex_regs_wen_o        ),
+        .ex_wr_addr_i     (ex_rd_addr_o         ),
+        .ex_wr_data_i     (ex_rd_data_o         ),
+        .mem_wen_i        (mem_regs_wen_o       ),
+        .mem_wr_addr_i    (mem_rd_addr_o        ),
+        .mem_wr_data_i    (mem_rd_data_o        ) 
+    );
 
     //ctrl
     ctrl u_ctrl(
-        .clk           (clk           ),
-        .rstn          (rstn          ),
-        .ex_hold_flag_i(ex_hold_flag_o),
-        .hold_en_o     (hold_en_o     )
+        .clk            (clk            ),
+        .rstn           (rstn           ),
+
+        .ex_hold_flag_i (ex_hold_flag_o ),
+        .ex_jump_en_i   (ex_jump_en_o   ),
+        .ex_jump_base_i (ex_jump_base_o ),
+        .ex_jump_ofst_i (ex_jump_ofst_o ),
+        .prd_jump_en_i  (prd_jump_en_o  ),
+        .prd_fail       (prd_fail       ),
+        .id_ex_jump_en_i(id_ex_jump_en_o),
+        .hold_en_o      (hold_en_o      )
     );
 
     //pc
     pc u_pc(
-        .clk            (clk        ),
-        .rstn           (rstn       ),
-        .hold_en_i      (hold_en_o  ),
-        .ex_instaddr_i  (ex_instaddr_o),
-        .pc             (pc  )
+        .clk                (clk                ),
+        .rstn               (rstn               ),
+        .hold_en_i          (hold_en_o          ),
+        .prd_fail           (prd_fail           ),
+
+        .ex_instaddr_i      (ex_instaddr_o      ),
+        .ex_jump_en_i       (ex_jump_en_o       ),
+        .ex_jump_base_i     (ex_jump_base_o     ),
+        .ex_jump_ofset_i    (ex_jump_ofst_o     ),
+        .prd_jump_en_i      (prd_jump_en_o      ), 
+        .prd_jump_base_i    (prd_jump_base_o    ),
+        .prd_jump_ofset_i   (prd_jump_ofset_o   ),
+        .pc_o               (pc_o               )
     );
 
     //rom
@@ -141,8 +194,6 @@ module riscv_core(
     );
 
     //id
-    wire                    rs1_read_o;
-    wire                    rs2_read_o;
     id u_id(
         .clk            (clk                ),
         .rstn           (rstn               ),
@@ -183,6 +234,7 @@ module riscv_core(
     );
 
     //id_ex
+    
     id_ex u_id_ex(
         .clk            (clk                ),
         .rstn           (rstn               ),
@@ -192,12 +244,18 @@ module riscv_core(
         .op2_i          (id_op2_o           ),
         .regs_wen_i     (id_regs_wen_o      ),
         .rd_addr_i      (id_rd_addr_o       ),
+        .rs1_data_i     (rs1_data_o         ),
+        .rs2_data_i     (rs2_data_o         ),
         .inst_o         (id_ex_inst_o       ),
         .instaddr_o     (id_ex_instaddr_o   ),
         .op1_o          (id_ex_op1_o        ),
         .op2_o          (id_ex_op2_o        ),
         .regs_wen_o     (id_ex_regs_wen_o   ),
         .rd_addr_o      (id_ex_rd_addr_o    ),
+        .rs1_data_o     (id_ex_rs1_data_o   ),
+        .rs2_data_o     (id_ex_rs2_data_o   ),
+        .prd_jump_en_o  (id_ex_jump_en_o    ),
+        .prd_jump_en_i  (prd_jump_en_o      ),
         .hold_en_i      (hold_en_o          )        
     );
 
@@ -206,7 +264,9 @@ module riscv_core(
         .clk            (clk                ), 
         .rstn           (rstn               ), 
         .inst_i         (id_ex_inst_o       ), 
-        .instaddr_i     (id_ex_instaddr_o   ), 
+        .instaddr_i     (id_ex_instaddr_o   ),
+        .rs1_data_i     (id_ex_rs1_data_o   ),
+        .rs2_data_i     (id_ex_rs2_data_o   ),
         .op1_i          (id_ex_op1_o        ), 
         .op2_i          (id_ex_op2_o        ), 
         .regs_wen_i     (id_ex_regs_wen_o   ), 
@@ -221,7 +281,10 @@ module riscv_core(
         .regs_wen_o     (ex_regs_wen_o      ), 
         .rd_addr_o      (ex_rd_addr_o       ), 
         .rd_data_o      (ex_rd_data_o       ),
-        .hold_flag_o    (ex_hold_flag_o     ) 
+        .ex_hold_flag_o (ex_hold_flag_o     ),
+        .ex_jump_en_o   (ex_jump_en_o       ),
+        .ex_jump_base_o (ex_jump_base_o     ),
+        .ex_jump_ofst_o (ex_jump_ofst_o     )
     );
 
     //ex_mem

@@ -37,12 +37,11 @@ module prdct(
     input                           rs1_read_i          ,
     input                           rs2_read_i          ,
     
-    //to id
+    //to id_ex
     //output                          prd_jump_en_o       ,
-    //output[`InstAddrBus]            prd_jump_addr_o     ,
     
     //to ctrl
-    output                           prd_jump_en_o      ,      
+    //output                           prd_jump_en_o      ,      
     
     //from ex
     input                           ex_wen_i            ,
@@ -107,8 +106,12 @@ module prdct(
                 prd_jump_base_o = rs1;
                 prd_jump_ofset_o = sign_expd_imm_i;
             end
+            default:begin
+                prd_jump_en_o = `JumpDisable;
+                prd_jump_base_o = `CpuResetAddr;
+                prd_jump_ofset_o = `ZeroWord;
+            end
         endcase
     end
-
 
 endmodule

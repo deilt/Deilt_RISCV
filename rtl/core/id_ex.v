@@ -29,6 +29,8 @@ module id_ex(
     input[`RegBus]                  op2_i       ,
     input                           regs_wen_i  ,
     input[`RegAddrBus]              rd_addr_i   ,
+    input [`RegBus]                 rs1_data_i  ,
+    input [`RegBus]                 rs2_data_i  ,
     //to ex
     output[`InstBus]                inst_o      ,
     output[`InstAddrBus]            instaddr_o  ,
@@ -36,8 +38,14 @@ module id_ex(
     output[`RegBus]                 op2_o       ,
     output                          regs_wen_o  ,
     output[`RegAddrBus]             rd_addr_o   ,
+    output[`RegBus]                 rs1_data_o  ,
+    output[`RegBus]                 rs2_data_o  ,
+
+    output                          prd_jump_en_o,
+    //from prd
+    input                           prd_jump_en_i,
     //from ctrl
-    input[4:0]                      hold_en_i        //always 1,for now          
+    input[4:0]                      hold_en_i                
 );
     wire                    lden ;
     assign lden = !hold_en_i[2];
@@ -71,5 +79,9 @@ module id_ex(
     reg [`RegAddrBus]       rd_addr_r;
     gnrl_dfflr #(`RegAddrWidth) rd_addr_gnrl_dfflr(clk,rstn,lden,rd_addr_i,rd_addr_r);
     assign rd_addr_o = rd_addr_r;
-
+    
+    //prd_jump_en
+    reg                     prd_jump_en_r;
+    gnrl_dfflr #(1) rd_addr_gnrl_dfflr(clk,rstn,lden,prd_jump_en_i,prd_jump_en_r);
+    assign prd_jump_en_o = prd_jump_en_r;
 endmodule
