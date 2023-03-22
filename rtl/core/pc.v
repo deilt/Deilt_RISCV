@@ -54,7 +54,7 @@ module pc(
     /*assign base = ((prd_fail == 1'b1 && ex_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? ex_jump_base_i :
                   ((hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable) ?  ex_instaddr_i :
                   ((prd_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? prd_jump_base_i : 
-                  pc)));
+                  pc_o)));
     assign ofset = ((prd_fail == 1'b1 && ex_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? ex_jump_ofset_i :
                   ((hold_en_i[0] == `HoldEnable && (prd_jump_en_i == `JumpDisable || prd_fail == 1'b1) && ex_jump_en_i == `JumpDisable) ?  4'h4 :
                   ((prd_jump_en_i == `JumpEnable && hold_en_i[0] == `HoldEnable) ? prd_jump_ofset_i : 
@@ -66,7 +66,7 @@ module pc(
 
     assign base = (jump_but_prd_fail ? ex_jump_base_i :
                   (nojump_but_prd_fail_and_just_pause ? ex_instaddr_i :
-                  (prd_jump ? prd_jump_base_i : pc)));
+                  (prd_jump ? prd_jump_base_i : pc_o)));
     
     assign ofset = (jump_but_prd_fail ? ex_jump_ofset_i :
                   (nojump_but_prd_fail_and_just_pause ?  4'h4:

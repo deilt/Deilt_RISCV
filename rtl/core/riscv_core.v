@@ -174,7 +174,7 @@ module riscv_core(
     //rom
     rom u_rom(
         .clk            (clk        ),
-        .instaddr       (pc         ),
+        .instaddr       (pc_o         ),
         .data_in        (`ZeroWord  ),
         .cs             (1'b1       ),
         .we             (1'b0       ),
@@ -187,7 +187,7 @@ module riscv_core(
         .clk            (clk             ),
         .rstn           (rstn            ),
         .inst_i         (rom_data_o      ),
-        .instaddr_i     (pc              ),
+        .instaddr_i     (pc_o              ),
         .inst_o         (if_id_inst_o    ),
         .instaddr_o     (if_id_instaddr_o),
         .hold_en_i      (hold_en_o       )  

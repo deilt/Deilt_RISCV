@@ -50,7 +50,7 @@ module ex(
 
     output                          ex_jump_en_o    ,//add
     output[`InstAddrBus]            ex_jump_base_o  ,//add
-    output[`InstAddrBus]            ex_jump_ofst_o  ,//add
+    output[`InstAddrBus]            ex_jump_ofst_o  //add
     
 
 );
@@ -58,7 +58,11 @@ module ex(
     reg [`InstAddrBus]          instaddr_o;
     reg                         regs_wen_o;
     reg [`RegAddrBus]           rd_addr_o;
-    
+    reg                         ex_hold_flag_o;
+    reg                         ex_jump_en_o;  
+    reg [`InstAddrBus]          ex_jump_base_o;
+    reg [`InstAddrBus]          ex_jump_ofst_o;
+
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
     wire [6:0]  funct7 = inst_i[31:25];
@@ -132,7 +136,7 @@ module ex(
     //shift right arith imm
     `ifndef SRA_NOT
         //srai_logi = (op1_i >> shamt) | (({32{op1_i[31]}}) & ~((32'hffffffff) >> shamt));
-        sra_arith = (sr_shift) | (({32{op1_i[31]}}) & ~(sr_shift_mask));
+        assign sra_arith = (sr_shift) | (({32{op1_i[31]}}) & ~(sr_shift_mask));
     `endif  
 
     //assign sri_shift        = op1_i >> inst_i[24:20]; //op1_i >> shamt

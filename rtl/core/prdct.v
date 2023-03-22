@@ -52,6 +52,10 @@ module prdct(
     input[`RegAddrBus]              mem_wr_addr_i       ,
     input[`RegBus]                  mem_wr_data_i   
 );
+    reg                             prd_jump_en_o;
+    reg [`InstAddrBus]              prd_jump_base_o;
+    reg [`InstAddrBus]              prd_jump_ofset_o;
+    
     //简单译码(指令是属于普通指令还是分支跳转指令、分支跳转指令的类型和细节)
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];

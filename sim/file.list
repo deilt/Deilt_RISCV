@@ -13,6 +13,8 @@
 ../rtl/core/riscv_core.v
 ../rtl/core/rom.v
 ../rtl/core/wb.v
+../rtl/core/crtl
+../rtl/core/prdct.v
 
 ../rtl/general/gnrl_dffs.v
 ../rtl/general/gnrl_xchecker.v

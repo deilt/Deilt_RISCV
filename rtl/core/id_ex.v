@@ -18,7 +18,7 @@
 // 2023-03-10   Deilt           1.0                     Original
 // 2023-03-17   Deilt           1.1
 // *********************************************************************************
-`include "../defines/defines.v"
+//`include "../defines/defines.v"
 module id_ex(
     input                           clk         ,
     input                           rstn        ,
@@ -81,7 +81,17 @@ module id_ex(
     assign rd_addr_o = rd_addr_r;
     
     //prd_jump_en
-    reg                     prd_jump_en_r;
-    gnrl_dfflr #(1) rd_addr_gnrl_dfflr(clk,rstn,lden,prd_jump_en_i,prd_jump_en_r);
+    reg prd_jump_en_r;
+    gnrl_dfflr #(1) prd_jump_gnrl_dfflr(clk,rstn,lden,prd_jump_en_i,prd_jump_en_r);
     assign prd_jump_en_o = prd_jump_en_r;
+
+    //rs1_data_o
+    reg [`RegBus]           rs1_data_r;
+    gnrl_dfflr #(`RegWidth) rs1_data_gnrl_ dfflr(clk,rstn,lden,rs1_data_i,rs1_data_r);
+    assign rs1_data_o = rs1_data_r;
+
+    //rs2_data_o
+    reg [`RegBus]           rs2_data_r;
+    gnrl_dfflr #(`RegWidth) rs2_data_gnrl_dfflr(clk,rstn,lden,rs2_data_i,rs2_data_r);
+    assign rs2_data_o = rs2_data_r;
 endmodule
