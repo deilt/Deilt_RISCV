@@ -1,30 +1,50 @@
+// *********************************************************************************
+// Project Name : Deilt_RISCV
+// File Name    : testbench exp
+// Module Name  : 
+// Author       : Deilt
+// Email        : cjdeilt@qq.com
+// Website      : https://github.com/deilt/Deilt_RISC
+// Create Time  : 2023/03/23
+// Called By    :
+// Description  :
+// License      : Apache License 2.0
+//
+//
+// *********************************************************************************
+// Modification History:
+// Date         Auther          Version                 Description
+// -----------------------------------------------------------------------
+// 2023-03-23   Deilt           1.0                     Original
+//  
+// *********************************************************************************
 `timescale  1ns/1ps
-
-module tinyrisc_v_soc_tb;
+module core_tb;
     reg clk ;
-    reg rst ;
+    reg rstn ;
+    integer r;
 
-    wire x3 = tinyrisc_v_soc_tb.u_tinyrisc_v_soc.u_tinyrisc_v.u_regs.regs_memb[3];
-    wire x26 = tinyrisc_v_soc_tb.u_tinyrisc_v_soc.u_tinyrisc_v.u_regs.regs_memb[26];
-    wire x27 = tinyrisc_v_soc_tb.u_tinyrisc_v_soc.u_tinyrisc_v.u_regs.regs_memb[27];
-    integer r ;
+    wire x3 = core_tb.u_riscv_core.u_regfile.regs_mem[3];
+    wire x26 = core_tb.u_riscv_core.u_regfile.regs_mem[26];
+    wire x27 = core_tb.u_riscv_core.u_regfile.regs_mem[27];
     //initial
     initial begin
         #0 ;
         clk = 0 ;
-        rst = 0 ;
+        rstn = 0 ;
 
         #40 ;
-        rst = 1 ;
+        rstn = 1 ;
     end
 
     //clk gen
     always #10 clk = ~clk ;
 
-    //rom read txt
+    //rom
     initial begin
-        $readmemh("../generated/rv32ui-p-auipc.txt",tinyrisc_v_soc_tb.u_tinyrisc_v_soc.u_rom.rom_memb);
-        $display("rom[0] %h",tinyrisc_v_soc_tb.u_tinyrisc_v_soc.u_rom.rom_memb[0]);
+        $readmemh("../generated/rv32ui-p-beq.txt",core_tb.u_riscv_core.u_rom.u_gnrl_rom.mem_r);//for sim dir
+        $display("rom[0] %h",core_tb.u_riscv_core.u_rom.u_gnrl_rom.mem_r[0]);
+
     end
     //display
     initial begin
@@ -56,16 +76,16 @@ module tinyrisc_v_soc_tb;
             $display("~~~~~~~~~~#       #    #     #    ######~~~~~~~~~~~~~~~~");
             $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             $display("faild test: %d",x3);
-            for(r = 0;r<31;r = r + 1)begin
-                $display("x%2d register value is %d",r,tinyrisc_v_soc_tb.u_tinyrisc_v_soc.u_tinyrisc_v.u_regs.regs_memb[r]);
+        for(r = 0;r<31;r = r + 1)begin
+                $display("x%2d register value is %d",r,core_tb.u_riscv_core.u_regfile.regs_mem[r]);
             end
-            #20 $finish;
+        #20 $finish;
         end
     end
 
     //inst
-    tinyrisc_v_soc u_tinyrisc_v_soc(
+    riscv_core u_riscv_core(
         .clk(clk),
-        .rst(rst)
+        .rstn(rstn)
     );
 endmodule
