@@ -46,7 +46,7 @@
 ## 2 Architecture
 
 ![](./Arch/attachment/deilt_riscv_arch-16794540063221.png)
-
+![](./Arch/attachment/pipeline_ctrl.png)
 ## 3 工程目录文件说明
 
 ```
