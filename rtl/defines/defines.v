@@ -107,9 +107,12 @@
 `define INST_BLTU       3'b110
 `define INST_BGEU       3'b111
 
+
+// L type inst
+`define INST_TYPE_L     7'b0000011
+
 // S type inst
 `define INST_TYPE_S     7'b0100011
-
 // M Standard extension
 
 

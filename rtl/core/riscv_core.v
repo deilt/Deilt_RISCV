@@ -366,8 +366,8 @@ module riscv_core(
         .inst_i         (mem_wb_inst_o      ),
         .instaddr_i     (mem_wb_instaddr_o  ),
         .regs_wen_i     (mem_wb_regs_wen_o  ),
-        .rd_addr_i      (mem_rd_addr_o      ),
-        .rd_data_i      (mem_rd_data_o      ),
+        .rd_addr_i      (mem_wb_rd_addr_o   ),
+        .rd_data_i      (mem_wb_rd_data_o   ),
         .regs_wen_o     (wb_regs_wen_o      ),
         .rd_addr_o      (wb_rd_addr_o       ),
         .rd_data_o      (wb_rd_data_o       )
