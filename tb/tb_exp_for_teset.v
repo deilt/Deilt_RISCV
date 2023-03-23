@@ -1,7 +1,7 @@
 // *********************************************************************************
 // Project Name : Deilt_RISCV
 // File Name    : testbench exp
-// Module Name  : 
+// Module Name  : riscv_tb
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
 // Website      : https://github.com/deilt/Deilt_RISC
