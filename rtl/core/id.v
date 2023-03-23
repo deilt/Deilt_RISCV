@@ -94,15 +94,15 @@ module id(
                  ((rs1_read_o == `ReadDisable && opcode == `INST_JAL) ? instaddr_i :
                  ((rs1_read_o == `ReadEnable) ? rs1_data_i : `ZeroWord)))));*/
 
-    assign op1 = ((rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i) ? ex_wr_data_i :
-                 ((rs1_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs1_addr_o == mem_wr_addr_i) ? mem_wr_data_i :
+    assign op1 = ((rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg) ? ex_wr_data_i :
+                 ((rs1_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs1_addr_o == mem_wr_addr_i && mem_wr_addr_i != `ZeroReg) ? mem_wr_data_i :
                  ((rs1_read_o == `ReadEnable  && opcode == `INST_JALR ) ? instaddr_i : 
                  ((rs1_read_o == `ReadEnable) ? rs1_data_i :
                  ((rs1_read_o == `ReadDisable && opcode == `INST_JAL) ? instaddr_i : `ZeroWord)))));
 
     //op2
-    assign op2 = ((rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i) ? ex_wr_data_i :
-                 ((rs2_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs2_addr_o == mem_wr_addr_i) ? mem_wr_data_i :
+    assign op2 = ((rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg) ? ex_wr_data_i :
+                 ((rs2_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs2_addr_o == mem_wr_addr_i && mem_wr_addr_i != `ZeroReg) ? mem_wr_data_i :
                  (rs2_read_o == `ReadEnable ? rs2_data_i : 
                  ((rs2_read_o == `ReadDisable && funct3_sign_expd_imm == 1'b1) ? sign_expd_imm :
                  ((rs2_read_o == `ReadDisable && funct3_shamt) ?   ({{27'h0},rs2}) : 
@@ -185,8 +185,8 @@ module id(
                 rd_addr_o = rd;
             end
             `INST_TYPE_B:begin
-                case(funct3)
-                    `INST_BEQ,`INST_BNE,`INST_BLT,`INST_BGE,`INST_BLTU,`INST_BGEU:begin
+                //case(funct3)
+                //    `INST_BEQ,`INST_BNE,`INST_BLT,`INST_BGE,`INST_BLTU,`INST_BGEU:begin
                         rs1_addr_o = rs1;
                         rs2_addr_o = rs2;
                         rs1_read_o = `ReadEnable;
@@ -196,8 +196,30 @@ module id(
                         op2_o = op2;//rs2_data_o
                         //regs_wen_o = `WriteDisable;
                         //rd_addr_o = `ZeroReg;
-                    end
-                endcase
+                    //end
+                //endcase
+            end
+            `INST_TYPE_LUI:begin
+                //rs1_addr_o = `ZeroRegAddr;
+                //rs2_addr_o = `ZeroRegAddr;
+                //rs1_read_o = `ReadDisable;
+                //rs2_read_o = `ReadDisable;
+
+                op1_o = {inst_i[31:12],{12{1'b0}}};
+                op2_o = 32'h0000000c;//d:12 
+                regs_wen_o = `WriteEnable;
+                rd_addr_o = rd;
+            end
+            `INST_TYPE_AUIPC:begin
+                //rs1_addr_o = `ZeroRegAddr;
+                //rs2_addr_o = `ZeroRegAddr;
+                //rs1_read_o = `ReadDisable;
+                //rs2_read_o = `ReadDisable;
+
+                op1_o = instaddr_i;
+                op2_o = {inst_i[31:12],{12{1'b0}}} << 5'd12;
+                regs_wen_o = `WriteEnable;
+                rd_addr_o = rd;
             end
             default:begin
                 rs1_addr_o = `ZeroRegAddr;

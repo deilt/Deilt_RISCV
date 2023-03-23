@@ -77,8 +77,8 @@ module prdct(
     wire inst_b_jump_back = (imm_b[11] == 1'b1) ? 1'b1 : 1'b0;
 
     //id 阶段的数据冒险
-    assign rs1 = ((rs1_read_i == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_i == ex_wr_addr_i) ? ex_wr_data_i :
-                 ((rs1_read_i == `ReadEnable && mem_wen_i == `WriteEnable && rs1_addr_i == mem_wr_addr_i) ? mem_wr_data_i :
+    assign rs1 = ((rs1_read_i == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_i == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg) ? ex_wr_data_i :
+                 ((rs1_read_i == `ReadEnable && mem_wen_i == `WriteEnable && rs1_addr_i == mem_wr_addr_i && mem_wr_addr_i != `ZeroReg) ? mem_wr_data_i :
                  ((rs1_read_i == `ReadEnable) ? rs1_data_i : `ZeroReg)));
 
     //op2

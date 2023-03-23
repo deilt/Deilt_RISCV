@@ -156,6 +156,7 @@ module ex(
         instaddr_o = instaddr_i;
         regs_wen_o = regs_wen_i;
         rd_addr_o  = rd_addr_i;
+        rd_data = `ZeroReg;
 
         ex_hold_flag_o = `HoldDisable;
         ex_jump_en_o   = `JumpDisable;
@@ -289,6 +290,12 @@ module ex(
                         ex_jump_ofst_o = sign_expd_binst_imm;
                     end
                 endcase
+            end
+            `INST_TYPE_LUI:begin
+                rd_data = sl_shift;
+            end
+            `INST_TYPE_AUIPC:begin
+                rd_data = op1_add_op2;
             end
             default:begin
                 rd_data = `ZeroWord;

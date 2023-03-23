@@ -113,8 +113,13 @@
 
 // S type inst
 `define INST_TYPE_S     7'b0100011
-// M Standard extension
 
+// U inst
+`define INST_TYPE_LUI   7'0110111
+`define INST_TYPE_AUIPC 7'0010111
+
+
+// M Standard extension
 
 //JTAG
 

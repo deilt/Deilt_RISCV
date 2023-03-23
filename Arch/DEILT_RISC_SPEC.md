@@ -920,7 +920,56 @@ B型指令通常包括
 
 - 2023/03/22 
 
-## 2.7 访存指令的实现(sotore = S型，load=I型)
+
+
+## 2.7 U型指令的实现
+
+### U型指令介绍
+
+![](attachment/inst.png)
+
+![image-20230323155753734](attachment/u_inst.png)
+
+![image-20230323155912878](attachment/u_inst1.png)
+
+U型指令通常包括,
+
+- opcode（操作码，7）
+
+- rd（目的寄存器，5）
+
+- Imm（立即数，20）
+
+  其中opcode用于判断指令的类型;IMM立即数是进行运算操作的数，这里直接给出，可以直接扩展后使用，不需要访问寄存器取值；rd为写回的目的寄存器地址。
+
+  
+
+通过上图我们可以看到U型指令有2种类型。下面我会一一解释。
+
+```c
+`LUI`(Load Upper Immediate)
+- lui rd, immediate
+- x[rd] = sext(immediate[31:12] << 12)
+- 20 位立即数 immediate 左移 12 位， 并将低 12 位置零， 写入 x[rd]中。
+```
+
+```c
+`AUIPC`(Add Upper Immediate to PC)
+- auipc rd, immediate
+- x[rd] = pc + sext(immediate[31:12] << 12)
+- 把符号位扩展的 20 位（左移 12 位）立即数加到 pc 上，结果写入 x[rd]。
+```
+
+### rtl代码实现
+
+- 实现U型指令
+- 修改了ID，EX模块
+
+### 仿真编译结果
+
+
+
+## 2.8 访存指令的实现(sotore = S型，load=I型)
 
 ### 访存指令介绍
 
