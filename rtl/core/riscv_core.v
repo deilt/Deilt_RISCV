@@ -71,7 +71,7 @@ module riscv_core(
 
     wire                          ex_jump_en_o;
     wire[`InstAddrBus]            ex_jump_base_o;
-    wire[`InstAddrBus]            ex_jump_ofset_o;
+    wire[`InstAddrBus]            ex_jump_ofst_o;
     //ex_mem
     wire [`InstBus]             ex_mem_inst_o;
     wire [`InstAddrBus]         ex_mem_instaddr_o;

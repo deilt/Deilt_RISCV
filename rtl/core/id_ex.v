@@ -87,7 +87,7 @@ module id_ex(
 
     //rs1_data_o
     reg [`RegBus]           rs1_data_r;
-    gnrl_dfflr #(`RegWidth) rs1_data_gnrl_ dfflr(clk,rstn,lden,rs1_data_i,rs1_data_r);
+    gnrl_dfflr #(`RegWidth) rs1_data_gnrl_dfflr(clk,rstn,lden,rs1_data_i,rs1_data_r);
     assign rs1_data_o = rs1_data_r;
 
     //rs2_data_o
