@@ -68,7 +68,7 @@ module ex(
     wire [6:0]  funct7 = inst_i[31:25];
     wire [4:0]  shamt  = inst_i[24:20];
     wire [31:0] sign_expd_imm = {{20{inst_i[31]}},inst_i[31:20]};
-    wire [31:0] sign_expd_binst_imm = {{20{inst_i[31]}},inst_i[30:25],inst_i[11:8],1'b0};
+    wire [31:0] sign_expd_binst_imm = {{20{inst_i[31]}},inst_i[7],inst_i[30:25],inst_i[11:8],1'b0};
 
     reg [`RegBus]               rd_data;
     wire [`RegBus]              op1_add_op2;
@@ -292,7 +292,7 @@ module ex(
                 endcase
             end
             `INST_TYPE_LUI:begin
-                rd_data = sl_shift;
+                rd_data = op1_add_op2;
             end
             `INST_TYPE_AUIPC:begin
                 rd_data = op1_add_op2;

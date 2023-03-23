@@ -40,7 +40,7 @@ module mem(
 );
     wire [6:0]  opcode = inst_i[6:0];
 
-    assign rd_data_o = (opcode == `INST_TYPE_I || opcode == `INST_TYPE_R_M || opcode == `INST_JAL || opcode == `INST_JALR)?  rd_data_i : 
+    assign rd_data_o = (opcode == `INST_TYPE_I || opcode == `INST_TYPE_R_M || opcode == `INST_JAL || opcode == `INST_JALR || opcode == `INST_TYPE_LUI || opcode == `INST_TYPE_AUIPC)?  rd_data_i : 
                         (opcode == `INST_TYPE_L ? mem_data_i : `ZeroWord);
     //assign rd_data_o = (opcode != `INST_TYPE_LOAD)?  rd_data_i : mem_data_i;
 

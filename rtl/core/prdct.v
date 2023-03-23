@@ -68,7 +68,7 @@ module prdct(
     wire [31:0] sign_expd_imm_j = {{12{inst_i[31]}},inst_i[19:12],inst_i[20],inst_i[30:21],1'b0};
     
     wire [11:0] imm_b = {{inst_i[31]},inst_i[30:25],inst_i[11:8],1'b0};
-    wire [31:0] sign_expd_imm_b = {{20{inst_i[31]}},inst_i[30:25],inst_i[11:8],1'b0};
+    wire [31:0] sign_expd_imm_b = {{20{inst_i[31]}},inst_i[7],inst_i[30:25],inst_i[11:8],1'b0};
 
     wire [`RegBus]  rs1;
     //wire [`RegBus]  rs2;

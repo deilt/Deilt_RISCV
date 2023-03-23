@@ -206,7 +206,7 @@ module id(
                 //rs2_read_o = `ReadDisable;
 
                 op1_o = {inst_i[31:12],{12{1'b0}}};
-                op2_o = 32'h0000000c;//d:12 
+                op2_o = `ZeroWord;
                 regs_wen_o = `WriteEnable;
                 rd_addr_o = rd;
             end
@@ -217,7 +217,7 @@ module id(
                 //rs2_read_o = `ReadDisable;
 
                 op1_o = instaddr_i;
-                op2_o = {inst_i[31:12],{12{1'b0}}} << 5'd12;
+                op2_o = {inst_i[31:12],{12{1'b0}}};
                 regs_wen_o = `WriteEnable;
                 rd_addr_o = rd;
             end

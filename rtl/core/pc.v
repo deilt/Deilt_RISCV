@@ -70,7 +70,7 @@ module pc(
     
     assign ofset = (jump_but_prd_fail ? ex_jump_ofset_i :
                   (nojump_but_prd_fail_and_just_pause ?  4'h4:
-                  (prd_jump ? prd_jump_base_i : 4'h4)));
+                  (prd_jump ? prd_jump_ofset_i : 4'h4)));
 
     assign pc = base + ofset ;
 
