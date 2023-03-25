@@ -39,18 +39,22 @@ module id(
     output[`InstAddrBus]        instaddr_o      ,
     output[`RegBus]             op1_o           ,
     output[`RegBus]             op2_o           ,
+    output[`RegBus]             id_rs1_data_o   ,//
+    output[`RegBus]             id_rs2_data_o   ,//
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
 
-    
     //from ex
+    input[`InstBus]             ex_inst_i       ,
     input                       ex_wen_i        ,
     input[`RegAddrBus]          ex_wr_addr_i    ,
     input[`RegBus]              ex_wr_data_i    ,
     //from mem
     input                       mem_wen_i       ,
     input[`RegAddrBus]          mem_wr_addr_i   ,
-    input[`RegBus]              mem_wr_data_i   
+    input[`RegBus]              mem_wr_data_i   ,
+    //to ctrl
+    output                      hold_flag_o 
 );
 
     wire [6:0]  opcode = inst_i[6:0];
@@ -62,6 +66,8 @@ module id(
     wire [4:0]  rd     = inst_i[11:7];
     wire [11:0] imm    = inst_i[31:20];
     wire [31:0] sign_expd_imm = {{20{inst_i[31]}},inst_i[31:20]};
+    wire [31:0] sign_expd_imm_s = {{20{inst_i[31]}},inst_i[31:25],inst_i[11:7]};
+    wire [6:0]  last_opcode = ex_inst_i[6:0];
 
     reg [`InstBus]              inst_o;
     reg [`InstAddrBus]          instaddr_o;
@@ -80,34 +86,32 @@ module id(
 
     wire                        funct3_sign_expd_imm;
     wire                        funct3_shamt;
+
+    wire                        hold_flag_o;
     // 产生扩展立即数判断
-    assign funct3_sign_expd_imm = (opcode == `INST_TYPE_I && (funct3 == `INST_ADDI || funct3 == `INST_SLTI || funct3 == `INST_SLTIU || 
-                                    funct3 == `INST_XORI || funct3 == `INST_ORI || funct3 == `INST_ANDI));
+    //assign funct3_sign_expd_imm = (opcode == `INST_TYPE_I && (funct3 == `INST_ADDI || funct3 == `INST_SLTI || funct3 == `INST_SLTIU || 
+                                    //funct3 == `INST_XORI || funct3 == `INST_ORI || funct3 == `INST_ANDI));
     
     //产生位移扩展判断
-    assign funct3_shamt = (opcode == `INST_TYPE_I && (funct3 == `INST_SLLI || funct3 == `INST_SRLI));
+    //assign funct3_shamt = (opcode == `INST_TYPE_I && (funct3 == `INST_SLLI || funct3 == `INST_SRLI));
+
+    //id 暂停流水线 load冒险
+    assign hold_flag_o = (rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg && last_opcode == `INST_TYPE_L) 
+                        || (rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg || last_opcode == `INST_TYPE_L);
 
     //op1 
-    /*assign op1 = ((rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i) ? ex_wr_data_i :
-                 ((rs1_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs1_addr_o == mem_wr_addr_i) ? mem_wr_data_i :
-                 ((rs1_read_o == `ReadEnable  && opcode == `INST_JALR ) ? instaddr_i : 
-                 ((rs1_read_o == `ReadDisable && opcode == `INST_JAL) ? instaddr_i :
-                 ((rs1_read_o == `ReadEnable) ? rs1_data_i : `ZeroWord)))));*/
-
     assign op1 = ((rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg) ? ex_wr_data_i :
                  ((rs1_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs1_addr_o == mem_wr_addr_i && mem_wr_addr_i != `ZeroReg) ? mem_wr_data_i :
-                 ((rs1_read_o == `ReadEnable  && opcode == `INST_JALR ) ? instaddr_i : 
-                 ((rs1_read_o == `ReadEnable) ? rs1_data_i :
-                 ((rs1_read_o == `ReadDisable && opcode == `INST_JAL) ? instaddr_i : `ZeroWord)))));
+                 ((rs1_read_o == `ReadEnable) ? rs1_data_i : `ZeroWord)));
+
 
     //op2
     assign op2 = ((rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg) ? ex_wr_data_i :
                  ((rs2_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs2_addr_o == mem_wr_addr_i && mem_wr_addr_i != `ZeroReg) ? mem_wr_data_i :
-                 (rs2_read_o == `ReadEnable ? rs2_data_i : 
-                 ((rs2_read_o == `ReadDisable && funct3_sign_expd_imm == 1'b1) ? sign_expd_imm :
-                 ((rs2_read_o == `ReadDisable && funct3_shamt) ?   ({{27'h0},rs2}) : 
-                 ((rs2_read_o == `ReadDisable && (opcode == `INST_JAL || opcode == `INST_JALR))? 32'h4 : `ZeroWord))))));
+                 (rs2_read_o == `ReadEnable ? rs2_data_i : `ZeroWord)));
 
+    assign id_rs1_data_o = op1;
+    assign id_rs2_data_o = op2;
 
     //decode
     always @(*)begin
@@ -132,7 +136,7 @@ module id(
                         rs1_read_o = `ReadEnable;
                         rs2_read_o = `ReadDisable;
                         op1_o = op1; //rs1_data_i
-                        op2_o = op2;//sign_expd_imm
+                        op2_o = sign_expd_imm;//sign_expd_imm
                         regs_wen_o = `WriteEnable;
                         rd_addr_o = rd;
                     end
@@ -142,7 +146,7 @@ module id(
                         rs1_read_o = `ReadEnable;
                         rs2_read_o = `ReadDisable;
                         op1_o = op1 ;//rs1_data_i
-                        op2_o = op2 ;//{{27'h0},rs2};(shamt) shamt = rs2
+                        op2_o = {{27'h0},rs2} ;//{{27'h0},rs2};(shamt) shamt = rs2
                         regs_wen_o = `WriteEnable;
                         rd_addr_o = rd;
                     end
@@ -157,7 +161,7 @@ module id(
                         rs1_read_o = `ReadEnable;
                         rs2_read_o = `ReadEnable;
                         op1_o = op1;//rs1_data_i
-                        op2_o = op2;//rs2_data_o
+                        op2_o = op2;//rs2_data_i
                         regs_wen_o = `WriteEnable;
                         rd_addr_o = rd;
                     end
@@ -169,8 +173,8 @@ module id(
                 //rs2_addr_o = `ZeroRegAddr;
                 //rs1_read_o = `ReadDisable;
                 //rs2_read_o = `ReadDisable;
-                op1_o = op1;//PC
-                op2_o = op2;//+4
+                op1_o = instaddr_i;//PC
+                op2_o = 32'h4;//+4
                 regs_wen_o = `WriteEnable;
                 rd_addr_o = rd;
             end
@@ -179,8 +183,8 @@ module id(
                 //rs2_addr_o = `ZeroRegAddr;
                 rs1_read_o = `ReadEnable;
                 //rs2_read_o = `ReadDisable;
-                op1_o = op1;//PC
-                op2_o = op2;//+4
+                op1_o = instaddr_i;//PC
+                op2_o = 32'h4;//+4
                 regs_wen_o = `WriteEnable;
                 rd_addr_o = rd;
             end
@@ -221,12 +225,38 @@ module id(
                 regs_wen_o = `WriteEnable;
                 rd_addr_o = rd;
             end
+            `INST_TYPE_L:begin
+                rs1_addr_o = rs1;
+                //rs2_addr_o = `ZeroRegAddr;
+                rs1_read_o = `ReadEnable;
+                //rs2_read_o = `ReadDisable;
+
+                op1_o = op1;//rs1_data_i
+                op2_o = sign_expd_imm;
+                regs_wen_o = `WriteEnable;
+                rd_addr_o = rd;
+            end
+            `INST_TYPE_S:begin
+                rs1_addr_o = rs1;
+                rs2_addr_o = rs2;
+                rs1_read_o = `ReadEnable;
+                rs2_read_o = `ReadEnable;
+
+                op1_o = op1;//rs1_data_i
+                op2_o = sign_expd_imm_s;
+                //regs_wen_o = `WriteDisable;
+                //rd_addr_o = `ZeroReg;
+            end
             default:begin
                 rs1_addr_o = `ZeroRegAddr;
                 rs2_addr_o = `ZeroRegAddr;
-                op1_o = `ZeroWord ;
-                op2_o =  `ZeroWord;
-                regs_wen_o = `WriteDisable;    
+                rs1_read_o = `ReadDisable;
+                rs2_read_o = `ReadDisable;
+
+                op1_o = `ZeroWord;
+                op2_o = `ZeroWord;
+                regs_wen_o = `WriteDisable;
+                rd_addr_o = `ZeroReg;    
             end
         endcase
     end

@@ -19,6 +19,7 @@
 // 2023-03-14   Deilt           1.1                     v0.1
 // 2023-03-15   Deilt           1.2                     v0.2
 // 2023-03-17   Deilt           1.3
+// 2023-03-24   Deilt           1.4
 // *********************************************************************************
 
 `define CpuResetAddr    32'h0
@@ -51,6 +52,9 @@
 `define MemDepth        131071
 `define MemBank         2
 `define MemUnit         4
+`define CsEnable        1'b1
+`define CsDisable       1'b0
+
 
 //reg
 `define RegAddrBus      4:0          //reg的地址总线宽度
@@ -107,12 +111,19 @@
 `define INST_BLTU       3'b110
 `define INST_BGEU       3'b111
 
-
 // L type inst
 `define INST_TYPE_L     7'b0000011
+`define INST_LB         3'b000
+`define INST_LH         3'b001
+`define INST_LW         3'b010
+`define ISNT_LBU        3'b100
+`define ISNT_LHU        3'b101
 
 // S type inst
 `define INST_TYPE_S     7'b0100011
+`define INST_SB         3'b000
+`define INST_SH         3'b001
+`define INST_SW         3'b010
 
 // U inst
 `define INST_TYPE_LUI   7'b0110111

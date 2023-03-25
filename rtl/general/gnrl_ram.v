@@ -63,14 +63,14 @@ module gnrl_ram
             if((8*i+8) > DW ) begin: last
             always @(posedge clk) begin
                 if (wen[i]) begin
-                mem_r[addr][DW-1:8*i] <= din[DW-1:8*i];
+                mem_r[addr_r2][DW-1:8*i] <= din[DW-1:8*i];
                 end
             end
             end
             else begin: non_last
             always @(posedge clk) begin
                 if (wen[i]) begin
-                mem_r[addr][8*i+7:8*i] <= din[8*i+7:8*i];
+                mem_r[addr_r2][8*i+7:8*i] <= din[8*i+7:8*i];
                 end
             end
             end

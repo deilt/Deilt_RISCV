@@ -34,6 +34,8 @@ module ctrl(
     output                          prd_fail                ,                          
     //from id_ex
     input                           id_ex_jump_en_i         ,    
+    //from id
+    input                           id_hold_flag_i          ,
 
     output[4:0]                     hold_en_o       
 );
@@ -53,13 +55,16 @@ module ctrl(
         if(rstn == `RstEnable)begin
             hold_en_o = 5'b00000 ;
         end
-        else if(ex_hold_flag_i)begin//普通的暂停
+        else if(ex_hold_flag_i)begin//ex普通的暂停
             hold_en_o = 5'b01111;
+        end
+        else if(prd_fail)begin//预测失败
+            hold_en_o = 5'b00111;
         end
         else if(prd_jump_en_i)begin//因为是预测跳转，那么要将指令推送到ex模块，进行校验，所以id_ex模块不冲刷
             hold_en_o = 5'b00011;
         end
-        else if(prd_fail)begin//预测失败
+        else if(id_hold_flag_i)begin//id普通的暂停 load
             hold_en_o = 5'b00111;
         end
         else begin

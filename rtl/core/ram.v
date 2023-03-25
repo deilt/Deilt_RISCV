@@ -25,7 +25,7 @@ module ram(
     input[`InstBus]             data_in     ,
     input                       cs          ,    //chip select
     input                       we          ,    //write enable ,1 write ,0 read
-    input[`MemUnit]             wem         ,    //写使能端口选择信号，用于选择要写入的RAM单元。
+    input[3:0]                  wem         ,    //写使能端口选择信号，用于选择要写入的RAM单元。
     output[`InstBus]            mem_data_o  
 );
     

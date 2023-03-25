@@ -63,6 +63,12 @@ module ex(
     reg [`InstAddrBus]          ex_jump_base_o;
     reg [`InstAddrBus]          ex_jump_ofst_o;
 
+    reg                         cs_o;
+    reg                         mem_we_o;
+    reg [`MemUnit-1:0]          mem_wem_o;
+    reg [`MemBus]               mem_din;
+    reg [`MemAddrBus]           mem_addr_o;
+
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
     wire [6:0]  funct7 = inst_i[31:25];
@@ -163,6 +169,11 @@ module ex(
         ex_jump_base_o = `CpuResetAddr;
         ex_jump_ofst_o = `ZeroWord;
         
+        cs_o           = `CsDisable;
+        mem_we_o       = `WriteDisable;
+        mem_wem_o      = {`MemUnit{1'b0}};
+        mem_din        = `ZeroWord;
+        mem_addr_o     = `ZeroReg;
         case(opcode)
             `INST_TYPE_I:begin
                 case(funct3)
@@ -237,6 +248,9 @@ module ex(
                     `INST_AND:begin
                         rd_data = op1_and_op2;
                     end
+                    default:begin
+                        rd_data = `ZeroReg;
+                    end
                 endcase 
             end
             `INST_JAL:begin
@@ -289,6 +303,12 @@ module ex(
                         ex_jump_base_o = instaddr_i;
                         ex_jump_ofst_o = sign_expd_binst_imm;
                     end
+                    default:begin
+                        ex_hold_flag_o = `HoldDisable;
+                        ex_jump_en_o   = `JumpDisable;
+                        ex_jump_base_o = `CpuResetAddr;
+                        ex_jump_ofst_o = `ZeroWord;
+                    end
                 endcase
             end
             `INST_TYPE_LUI:begin
@@ -297,8 +317,75 @@ module ex(
             `INST_TYPE_AUIPC:begin
                 rd_data = op1_add_op2;
             end
+            `INST_TYPE_L:begin
+                    //rd_data = `ZeroReg;
+                    cs_o       = `CsEnable;
+                    mem_we_o   = `WriteDisable;
+                    mem_din    = `ZeroWord;
+                    mem_addr_o = op1_add_op2;
+                    mem_wem_o  = 4'b0000;
+            end
+            `INST_TYPE_S:begin
+                //rd_data = `ZeroReg;
+                cs_o       = `CsEnable;
+                mem_we_o   = `WriteEnable;
+                mem_addr_o = op1_add_op2;
+                case(funct3)
+                    `INST_SB:begin
+                        case(op1_add_op2[1:0])
+                            2'b11:begin
+                                mem_din = {rs2_data_i[7:0],24'h0};
+                                mem_wem_o = 4'b1000;
+                            end
+                            2'b10:begin
+                                mem_din = {8'h0,rs2_data_i[7:0],16'h0};
+                                mem_wem_o = 4'b0100;
+                            end
+                            2'b01:begin
+                                mem_din = {16'h0,rs2_data_i[7:0],8'h0};
+                                mem_wem_o = 4'b0010;
+                            end
+                            default:begin
+                                mem_din = {24'h0,rs2_data_i[7:0]};
+                                mem_wem_o = 4'b0001;
+                            end
+                        endcase
+                    end
+                    `INST_SH:begin
+                        case(op1_add_op2[1:0])
+                            2'b00:begin
+                                mem_din    = {16'h0,rs2_data_i[15:0]};
+                                mem_wem_o  =  4'b0011;
+                            end
+                            default:begin
+                                mem_din    = {rs2_data_i[15:0],16'h0};
+                                mem_wem_o  =  4'b1100;
+                            end
+                        endcase
+                    end
+                    `INST_SW:begin
+                        mem_din    = rs2_data_i;
+                        mem_wem_o  = 4'b1111;
+                    end
+                    default:begin
+                        mem_din    = `ZeroWord;
+                        mem_wem_o  = 4'b0000;
+                    end
+                endcase
+            end
             default:begin
-                rd_data = `ZeroWord;
+                rd_data = `ZeroReg;
+
+                ex_hold_flag_o = `HoldDisable;
+                ex_jump_en_o   = `JumpDisable;
+                ex_jump_base_o = `CpuResetAddr;
+                ex_jump_ofst_o = `ZeroWord;
+        
+                cs_o           = `CsDisable;
+                mem_we_o       = `WriteDisable;
+                mem_wem_o      = {`MemUnit{1'b0}};
+                mem_din        = `ZeroWord;
+                mem_addr_o     = `ZeroReg;
             end
         endcase
     end

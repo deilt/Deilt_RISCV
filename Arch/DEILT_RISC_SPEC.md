@@ -1137,11 +1137,45 @@ endmodule
 
 ### 访存指令数据通路图
 
+![image-20230324195541082](attachment/pipeline_load.png)
+
+### load冒险
+
+由下图可知，load指令和第二条指令存在数据相关的情况下，第二条指令则无法获取正确的数据。
+
+因此，通过在id阶段发处流水线暂停，使得第二条指令延迟一拍，则第二条指令可以获取MEM模块前递的数据。
+
+![image-20230325211824721](attachment/load_filct1.png)
+
+![image-20230325211857692](attachment/load_filct2.png)
+
 ### verilog代码实现
+
+- define.v文件中添加了访存指令的定义
+- 修改id模块，加入id阶段的流水线暂停
+- 修改ex模块
+- 修改mem模块
+- 修改ctrl，load冒险
+
+`load冒险处理`
+
+```verilog
+//id模块
+//id 暂停流水线 load冒险
+    assign hold_flag_o = (rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg && last_opcode == `INST_TYPE_L) 
+                        || (rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg || last_opcode == `INST_TYPE_L);
+
+//ctrl模块
+else if(id_hold_flag_i)begin//id普通的暂停 load
+            hold_en_o = 5'b00111;
+        end
+```
 
 ### 编译仿真结果
 
+- load，store指令均通过测试
 
+- 
 
 # 3 搭建数据通路（RV32M Standard Extension，8条）
 
