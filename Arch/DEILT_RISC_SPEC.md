@@ -1174,8 +1174,11 @@ else if(id_hold_flag_i)begin//id普通的暂停 load
 ### 编译仿真结果
 
 - load，store指令均通过测试
+- 代码等文件参考“rtl_20230325_s"
 
-- 
+
+
+
 
 # 3 搭建数据通路（RV32M Standard Extension，8条）
 
@@ -1269,3 +1272,10 @@ else if(id_hold_flag_i)begin//id普通的暂停 load
 
 
 ### 编译仿真结果
+
+
+
+
+
+# 4 自动化一键测试
+

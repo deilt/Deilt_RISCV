@@ -97,7 +97,7 @@ CSR 寄存器的访问采用专用的 CSR 指令，包括 CSRRW 、 CSRRS, CSRRC
 >`riscv-pk` 提供 RISC-V 可执行文件运行的程序运行环境，同时提供最简单的 bootloader;
 >`riscv-fesvr`是一个用于实现上位机和 CPU 之间通信机制的库。
 >`riscv-tests`, 是 一组 RISC-V 指令集测试用例。
->`riscv-opcodes` 模拟器可执行的所有RISC-V操作码,是一个 阳SC-V 操作码信息转换脚本。
+>`riscv-opcodes` 模拟器可执行的所有RISC-V操作码,是一个 RISC-V 操作码信息转换脚本。
 >--------------------------------------
 >riscv-gnu -toolchain 是支持 RISC-V 的 GNU 工具链，包含了以下内容。 
 >`riscv-gcc` : GCC 编译器 。 
