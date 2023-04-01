@@ -184,7 +184,7 @@ module tb_top();
   end
 `endif
 
-  reg[8*300:1] testcase;
+  reg[8*300:1] testcase;//测试用例
   integer dumpwave;
 
   initial begin

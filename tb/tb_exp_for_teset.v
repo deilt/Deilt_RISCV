@@ -4,7 +4,7 @@
 // Module Name  : riscv_tb
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
-// Website      : https://github.com/deilt/Deilt_RISC
+// Website      : https://github.com/deilt/Deilt_RISCV
 // Create Time  : 2023/03/23
 // Called By    :
 // Description  :
@@ -42,7 +42,7 @@ module core_tb;
 
     //rom
     initial begin
-        $readmemh("../generated/rv32ui-p-beq.txt",core_tb.u_riscv_core.u_rom.u_gnrl_rom.mem_r);//for sim dir
+        $readmemh({testcase,".txt"},core_tb.u_riscv_core.u_rom.u_gnrl_rom.mem_r);//for sim dir
         $display("rom[0] %h",core_tb.u_riscv_core.u_rom.u_gnrl_rom.mem_r[0]);
 
     end
@@ -51,6 +51,7 @@ module core_tb;
         wait(x26 == 32'h1);
         $display("regs[26] %h",x26);
         #40;
+
         if(x27 == 32'h1)begin
             $display("~~~~~~~~~~~~~~~~ TEST_PASS ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
             $display("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");

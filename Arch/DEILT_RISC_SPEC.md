@@ -1279,3 +1279,34 @@ else if(id_hold_flag_i)begin//id普通的暂停 load
 
 # 4 自动化一键测试
 
+
+
+# 5 中断异常处理
+
+
+
+# 6 总线
+
+
+
+# 7 外设
+
+## UART
+
+## SPI
+
+## FLASH
+
+## SDRAM
+
+## GPIO
+
+
+
+# 8 JTAG
+
+
+
+# 9 FPGA
+
+liang

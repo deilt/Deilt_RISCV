@@ -26,7 +26,7 @@
 
 ## 1 feature
 
-本项目拟设计一个五级流水的单核32位处理器（Deilt_RISC），采用Verilog编写。其具有以下特点：
+本项目拟设计一个五级流水的单核32位处理器（Deilt_RISCV），采用Verilog编写。其具有以下特点：
 
 - 工作频率（）？
 - 按序发射按序执行按序写回的五级流水线 
@@ -40,13 +40,14 @@
 - 支持中断
 - 模块与模块的接口均采用严谨的 valid-ready 握手接口
 - IP模块包括：中断控制器、计时器（TImer）、UART、SPI
-- 支持JTAG调试，调试软件GDB
+- 支持JTAG调试
 - 未完待续。。。
 
 ## 2 Architecture
 
 ![](./Arch/attachment/deilt_riscv_arch-16794540063221.png)
-![](./Arch/attachment/pipeline_ctrl.png)
+![](./Arch/attachment/pipeline_load.png)
+
 ## 3 工程目录文件说明
 
 ```

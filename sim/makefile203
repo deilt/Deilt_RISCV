@@ -1,5 +1,5 @@
-SIM_DIR     := ${PWD}
-RUN_DIR      := ${PWD}/run
+SIM_DIR     := ${PWD} #当前目录的路径保存在SIM_DIR变量中
+RUN_DIR      := ${PWD}/run #并将运行仿真所需文件的目录路径保存在RUN_DIR变量中
 
 
 
@@ -9,7 +9,7 @@ TESTCASE     := ${RUN_DIR}/../../riscv-tools/riscv-tests/isa/generated/${TESTNAM
 #TESTNAME     := helloworld
 #TESTCASE     := ${RUN_DIR}/../../hbird-sdk/application/baremetal/helloworld/${TESTNAME}
 
-SIM          := iverilog 
+SIM          := vcs
 DUMPWAVE     := 1
 
 CORE        := e203
