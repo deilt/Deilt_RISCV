@@ -4,7 +4,7 @@
 // Module Name  : gnrl_xchecker
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
-// Website      : https://github.com/deilt/Deilt_RISC
+// Website      : https://github.com/deilt/Deilt_RISCV
 // Create Time  : 2023-02-22
 // Called By    :
 // Description  : This is a Verilog module named gnrl_xchecker 

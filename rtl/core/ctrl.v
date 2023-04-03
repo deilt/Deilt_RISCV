@@ -4,7 +4,7 @@
 // Module Name  : ctrl
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
-// Website      : https://github.com/deilt/Deilt_RISC
+// Website      : https://github.com/deilt/Deilt_RISCV
 // Create Time  : 20230317
 // Called By    :
 // Description  : pipeline flush

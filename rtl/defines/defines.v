@@ -4,7 +4,7 @@
 // Module Name  : defines
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
-// Website      : https://github.com/deilt/Deilt_RISC
+// Website      : https://github.com/deilt/Deilt_RISCV
 // Create Time  : 2023/01/04
 // Called By    : 
 // Description  : 
