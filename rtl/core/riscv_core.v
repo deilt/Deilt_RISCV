@@ -75,6 +75,11 @@ module riscv_core(
     wire                          ex_jump_en_o;
     wire[`InstAddrBus]            ex_jump_base_o;
     wire[`InstAddrBus]            ex_jump_ofst_o;
+    wire                          div_start_o;
+    wire[`RegBus]                 div_dividend_o;
+    wire[`RegBus]                 div_divisor_o;
+    wire[2:0]                     div_op_o;
+    wire[`RegAddrBus]             div_reg_waddr_o;
     //ex_mem
     wire [`InstBus]             ex_mem_inst_o;
     wire [`InstAddrBus]         ex_mem_instaddr_o;
@@ -117,7 +122,12 @@ module riscv_core(
     wire                        prd_jump_en_o;
     wire [`InstAddrBus]         prd_jump_base_o;
     wire [`InstAddrBus]         prd_jump_ofset_o;
-
+    
+    //ex_mdu
+    wire[`RegBus]       mdu_result_o;
+    wire                mdu_ready_o;
+    wire                mdu_busy_o;
+    wire[`RegAddrBus]   mdu_reg_waddr_o;
 
     //prd
     prdct u_prdct(
@@ -292,7 +302,31 @@ module riscv_core(
         .ex_hold_flag_o (ex_hold_flag_o     ),
         .ex_jump_en_o   (ex_jump_en_o       ),
         .ex_jump_base_o (ex_jump_base_o     ),
-        .ex_jump_ofst_o (ex_jump_ofst_o     )
+        .ex_jump_ofst_o (ex_jump_ofst_o     ),
+        .div_ready_i    (mdu_ready_o        ),
+        .div_res_i      (mdu_result_o       ),
+        .div_busy_i     (mdu_busy_o         ),
+        .div_reg_waddr_i(mdu_reg_waddr_o    ),
+        .div_start_o    (div_start_o        ),
+        .div_dividend_o (div_dividend_o     ),
+        .div_divisor_o  (div_divisor_o      ),
+        .div_op_o       (div_op_o           ),
+        .div_reg_waddr_o(div_reg_waddr_o    )
+    );
+
+    //ex_mdu
+    ex_mdu u_ex_mdu(
+        .clk            (clk),
+        .rstn           (rstn),
+        .dividend_i     (div_dividend_o     ),
+        .divisor_i      (div_divisor_o      ),
+        .start_i        (div_start_o        ),
+        .op_i           (div_op_o           ),
+        .reg_waddr_i    (div_reg_waddr_o    ),
+        .result_o       (mdu_result_o       ),
+        .ready_o        (mdu_ready_o        ),
+        .busy_o         (mdu_busy_o         ),
+        .reg_waddr_o    (mdu_reg_waddr_o    )
     );
 
     //ex_mem

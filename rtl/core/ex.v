@@ -18,6 +18,7 @@
 // 2023-03-10   Deilt           1.0                     Original
 // 2023-03-17   Deilt           1.1
 // 2023-03-25   Deilt           1.2 
+// 2023-04-04   Deilt           1.3
 // *********************************************************************************
 `include "../defines/defines.v"
 module ex(
@@ -26,8 +27,8 @@ module ex(
     //from id_ex
     input[`InstBus]                 inst_i      ,
     input[`InstAddrBus]             instaddr_i  ,
-    input[`RegBus]                  rs1_data_i  ,//add
-    input[`RegBus]                  rs2_data_i  ,//add
+    input[`RegBus]                  rs1_data_i  ,
+    input[`RegBus]                  rs2_data_i  ,
 
     input[`RegBus]                  op1_i       ,
     input[`RegBus]                  op2_i       ,
@@ -47,22 +48,33 @@ module ex(
     output[`RegAddrBus]             rd_addr_o   ,
     output[`RegBus]                 rd_data_o   ,
     //to ctrl
-    output                          ex_hold_flag_o ,//modify
+    output                          ex_hold_flag_o  ,
 
-    output                          ex_jump_en_o    ,//add
-    output[`InstAddrBus]            ex_jump_base_o  ,//add
-    output[`InstAddrBus]            ex_jump_ofst_o  //add
-    
+    output                          ex_jump_en_o    ,
+    output[`InstAddrBus]            ex_jump_base_o  ,
+    output[`InstAddrBus]            ex_jump_ofst_o  ,
+
+    //from mdu
+    input                           div_ready_i     ,//除法完成计算
+    input[`RegBus]                  div_res_i       ,//resul
+    input                           div_busy_i      ,//除法进行中
+    input[`RegAddrBus]              div_reg_waddr_i ,
+    //to mdu
+    output                          div_start_o     ,//开始除法运算标志
+    output[`RegBus]                 div_dividend_o  ,//被除数
+    output[`RegBus]                 div_divisor_o   ,//除数
+    output[2:0]                     div_op_o        ,//除法指令
+    output[`RegAddrBus]             div_reg_waddr_o  //最终写回的地址
 
 );
     reg [`InstBus]              inst_o;
-    reg [`InstAddrBus]          instaddr_o;
-    reg                         regs_wen_o;
-    reg [`RegAddrBus]           rd_addr_o;
-    reg                         ex_hold_flag_o;
-    reg                         ex_jump_en_o;  
-    reg [`InstAddrBus]          ex_jump_base_o;
-    reg [`InstAddrBus]          ex_jump_ofst_o;
+    reg [`InstAddrBus]          instaddr_o_d;
+    reg                         regs_wen;
+    reg [`RegAddrBus]           rd_addr;
+    reg                         ex_hold_flag;
+    reg                         ex_jump_en;  
+    reg [`InstAddrBus]          ex_jump_base;
+    reg [`InstAddrBus]          ex_jump_ofst;
 
     reg                         cs_o;
     reg                         mem_we_o;
@@ -95,9 +107,47 @@ module ex(
 
     wire [`RegBus]              sl_shift;
 
+    //div
+    reg                         div_start_o    ;
+    reg[`RegBus]                div_dividend_o ;
+    reg[`RegBus]                div_divisor_o  ;
+    reg[2:0]                    div_op_o       ;
+    reg[`RegAddrBus]            div_reg_waddr_o;
+
+    reg                         div_wen;
+    reg[`RegBus]                div_wdata;
+    reg[`RegAddrBus]            div_waddr;
+
+    reg                         div_jump_en;
+    reg                         div_hold_flag;
+    reg[`InstAddrBus]           div_jump_base;
+    reg[`InstAddrBus]           div_jump_ofst;
+    reg[`InstAddrBus]           div_instaddr;
     
+    
+    //instaddr_o
+    assign instaddr_o = instaddr_o_d | div_instaddr;
+
     //rd_data_o
-    assign rd_data_o = rd_data;
+    assign rd_data_o = rd_data | div_wdata;
+
+    //jump_en_o
+    assign ex_jump_en_o = ex_jump_en || div_jump_en;
+
+    //ex_hold_flag_o
+    assign ex_hold_flag_o = ex_hold_flag || div_hold_flag;
+
+    //ex_jump_base
+    assign ex_jump_base_o = ex_jump_base | div_jump_base ;
+
+    //ex_jump_ofst_o
+    assign ex_jump_ofst_o = ex_jump_ofst | div_jump_ofst;
+
+    //reg_wen_o
+    assign regs_wen_o = regs_wen || div_wen;
+
+    //rd_addr_o
+    assign rd_addr_o = rd_addr | div_waddr;
 
     //----------------------------------------
     //add 
@@ -157,18 +207,89 @@ module ex(
     //shift left logi imm
     assign sl_shift         = op1_i << op2_i[4:0];
     //----------------------------------------
+
+    
+    //-----------------------------------------
+    //MUL
+    
+    //----------------------------------------
+
+
+    //-----------------------------------------
+    //DIV
+    
+    always @(*)begin
+        div_dividend_o = op1_i;
+        div_divisor_o  = op2_i;
+        div_op_o       = funct3;
+        div_reg_waddr_o = rd_addr_i;
+        if((opcode == `INST_TYPE_R_M) && (funct7 == 7'b0000001))begin//第一个时钟开始除法
+            div_wen = `WriteDisable;
+            div_waddr = `ZeroWord;
+            div_wdata = `ZeroWord;
+            div_instaddr = instaddr_i;//锁存
+            case(funct3)
+                `INST_DIV,`INST_DIVU,`INST_REM,`INST_REMU:begin
+                    div_start_o = 1'b1;
+                    div_jump_en = `JumpEnable;
+                    div_hold_flag = `HoldEnable;
+                    div_jump_base = instaddr_i;
+                    div_jump_ofst = 32'h4;
+                end
+                default:begin
+                    div_start_o = 1'b0;
+                    div_jump_en = `JumpDisable;
+                    div_hold_flag = `HoldDisable;
+                    div_jump_base = `ZeroWord;
+                    div_jump_ofst = 32'h0;
+                    div_jump_base = `ZeroWord;
+                end
+            endcase 
+        end
+        else begin //第二个时钟
+            div_jump_en = `JumpDisable;
+            div_jump_base = `ZeroWord;
+            div_jump_ofst = `ZeroWord;
+            if(div_busy_i == 1'b1)begin //计算中
+                div_start_o = 1'b1;
+                div_wen = `WriteDisable;
+                div_wdata = `ZeroWord;
+                div_waddr = `ZeroReg;
+                div_hold_flag = `HoldEnable;
+            end
+            else begin//计算结束，或者非除法
+                div_instaddr = `ZeroWord;
+                div_start_o = 1'b0;
+                div_hold_flag = `HoldDisable;
+                if(div_ready_i == 1'b1)begin //计算结束
+                    div_wen = `WriteEnable;
+                    div_waddr = div_reg_waddr_i;
+                    div_wdata = div_res_i;
+                end
+                else begin //非除法
+                    div_wen = `WriteDisable;
+                    div_waddr = `ZeroReg;
+                    div_wdata = `ZeroWord;
+                end
+            end
+        end
+    end
+    //----------------------------------------
+
+
+
     //ex
     always @(*)begin
         inst_o =inst_i;
-        instaddr_o = instaddr_i;
-        regs_wen_o = regs_wen_i;
-        rd_addr_o  = rd_addr_i;
+        instaddr_o_d = instaddr_i;
+        regs_wen = regs_wen_i;
+        rd_addr  = rd_addr_i;
         rd_data = `ZeroReg;
 
-        ex_hold_flag_o = `HoldDisable;
-        ex_jump_en_o   = `JumpDisable;
-        ex_jump_base_o = `CpuResetAddr;
-        ex_jump_ofst_o = `ZeroWord;
+        ex_hold_flag = `HoldDisable;
+        ex_jump_en   = `JumpDisable;
+        ex_jump_base = `CpuResetAddr;
+        ex_jump_ofst = `ZeroWord;
         
         cs_o           = `CsDisable;
         mem_we_o       = `WriteDisable;
@@ -214,101 +335,115 @@ module ex(
                 endcase
             end
             `INST_TYPE_R_M:begin
-                case(funct3)
-                    `INST_ADD_SUB:begin
-                        if(funct7 == 7'b0000000)begin//add
-                            rd_data = op1_add_op2;
+                if(funct7 != 7'b0000001)begin
+                    case(funct3)
+                        `INST_ADD_SUB:begin
+                            if(funct7 == 7'b0000000)begin//add
+                                rd_data = op1_add_op2;
+                            end
+                            else begin//sub
+                                rd_data = op1_sub_op2;
+                            end
                         end
-                        else begin//sub
-                            rd_data = op1_sub_op2;
+                        `INST_SLL:begin
+                            rd_data = sl_shift;//op1_i << op2_i[4:0]
                         end
-                    end
-                    `INST_SLL:begin
-                        rd_data = sl_shift;//op1_i << op2_i[4:0]
-                    end
-                    `INST_SLT:begin
-                        rd_data = {32{(~op1_be_op2_signed)}} & 32'h1;
-                    end
-                    `INST_SLTU:begin
-                        rd_data = {32{(~op1_be_op2_unsigned)}} & 32'h1;
-                    end
-                    `INST_XOR:begin
-                        rd_data = op1_xor_op2;
-                    end
-                    `INST_SRL_SRA:begin
-                        if(funct7 == 7'b0000000)begin //ral
-                            rd_data = sr_shift;
+                        `INST_SLT:begin
+                            rd_data = {32{(~op1_be_op2_signed)}} & 32'h1;
                         end
-                        else begin //sra
-                            rd_data = sra_arith;
+                        `INST_SLTU:begin
+                            rd_data = {32{(~op1_be_op2_unsigned)}} & 32'h1;
                         end
-                    end
-                    `INST_OR:begin
-                        rd_data = op1_or_op2;
-                    end
-                    `INST_AND:begin
-                        rd_data = op1_and_op2;
-                    end
-                    default:begin
-                        rd_data = `ZeroReg;
-                    end
-                endcase 
+                        `INST_XOR:begin
+                            rd_data = op1_xor_op2;
+                        end
+                        `INST_SRL_SRA:begin
+                            if(funct7 == 7'b0000000)begin //ral
+                                rd_data = sr_shift;
+                            end
+                            else begin //sra
+                                rd_data = sra_arith;
+                            end
+                        end
+                        `INST_OR:begin
+                            rd_data = op1_or_op2;
+                        end
+                        `INST_AND:begin
+                            rd_data = op1_and_op2;
+                        end
+                        default:begin
+                            rd_data = `ZeroReg;
+                        end
+                    endcase 
+                end
+                else begin
+                    case(funct3)
+                        `INST_MUL:begin
+                        end
+                        `INST_MULH:begin
+                        end
+                        `INST_MULHSU:begin
+                        end
+                        `INST_MULHU:begin
+                        end
+                    endcase
+                end
             end
             `INST_JAL:begin
                 rd_data = op1_add_op2;//pc+4
-                ex_jump_en_o   = `JumpEnable;
-                ex_jump_base_o = instaddr_i;
-                ex_jump_ofst_o = {{12{inst_i[31]}},inst_i[19:12],inst_i[20],inst_i[30:21],1'b0};//sign_imm
+                ex_jump_en   = `JumpEnable;
+                ex_jump_base = instaddr_i;
+                ex_jump_ofst = {{12{inst_i[31]}},inst_i[19:12],inst_i[20],inst_i[30:21],1'b0};//sign_imm
             end
             `INST_JALR:begin
                 rd_data = op1_add_op2;//pc+4
-                ex_jump_en_o   = `JumpEnable;
-                ex_jump_base_o = rs1_data_i;
-                ex_jump_ofst_o = sign_expd_imm;//sign_imm
+                ex_jump_en   = `JumpEnable;
+                ex_jump_base = rs1_data_i;
+                ex_jump_ofst = sign_expd_imm;//sign_imm
             end
             `INST_TYPE_B:begin
                 case(funct3)
                     `INST_BEQ:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = op1_eq_op2;
-                        ex_jump_base_o = instaddr_i;
-                        ex_jump_ofst_o = sign_expd_binst_imm;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = op1_eq_op2;
+                        ex_jump_base = instaddr_i;
+                        ex_jump_ofst = sign_expd_binst_imm;
                     end
                     `INST_BNE:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = !op1_eq_op2;
-                        ex_jump_base_o = instaddr_i;
-                        ex_jump_ofst_o = sign_expd_binst_imm;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = !op1_eq_op2;
+                        ex_jump_base = instaddr_i;
+                        ex_jump_ofst = sign_expd_binst_imm;
                     end
                     `INST_BLT:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = !op1_be_op2_signed;
-                        ex_jump_base_o = instaddr_i;
-                        ex_jump_ofst_o = sign_expd_binst_imm;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = !op1_be_op2_signed;
+                        ex_jump_base = instaddr_i;
+                        ex_jump_ofst = sign_expd_binst_imm;
                     end
                     `INST_BGE:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = op1_be_op2_signed;
-                        ex_jump_base_o = instaddr_i;
-                        ex_jump_ofst_o = sign_expd_binst_imm;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = op1_be_op2_signed;
+                        ex_jump_base = instaddr_i;
+                        ex_jump_ofst = sign_expd_binst_imm;
                     end
                     `INST_BLTU:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = !op1_be_op2_unsigned;
-                        ex_jump_base_o = instaddr_i;
-                        ex_jump_ofst_o = sign_expd_binst_imm;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = !op1_be_op2_unsigned;
+                        ex_jump_base = instaddr_i;
+                        ex_jump_ofst = sign_expd_binst_imm;
                     end
                     `INST_BGEU:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = op1_be_op2_unsigned;
-                        ex_jump_base_o = instaddr_i;
-                        ex_jump_ofst_o = sign_expd_binst_imm;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = op1_be_op2_unsigned;
+                        ex_jump_base = instaddr_i;
+                        ex_jump_ofst = sign_expd_binst_imm;
                     end
                     default:begin
-                        ex_hold_flag_o = `HoldDisable;
-                        ex_jump_en_o   = `JumpDisable;
-                        ex_jump_base_o = `CpuResetAddr;
-                        ex_jump_ofst_o = `ZeroWord;
+                        ex_hold_flag = `HoldDisable;
+                        ex_jump_en   = `JumpDisable;
+                        ex_jump_base = `CpuResetAddr;
+                        ex_jump_ofst = `ZeroWord;
                     end
                 endcase
             end
@@ -377,10 +512,10 @@ module ex(
             default:begin
                 rd_data = `ZeroReg;
 
-                ex_hold_flag_o = `HoldDisable;
-                ex_jump_en_o   = `JumpDisable;
-                ex_jump_base_o = `CpuResetAddr;
-                ex_jump_ofst_o = `ZeroWord;
+                ex_hold_flag = `HoldDisable;
+                ex_jump_en   = `JumpDisable;
+                ex_jump_base = `CpuResetAddr;
+                ex_jump_ofst = `ZeroWord;
         
                 cs_o           = `CsDisable;
                 mem_we_o       = `WriteDisable;

@@ -19,6 +19,7 @@
 // 2023-03-14   Deilt           1.1                     v0.1
 // 2023-03-18   Deilt           1.2
 // 2023-03-25   Deilt           1.3
+// 2023-04-04   Deilt           1.4
 // *********************************************************************************
 `include "../defines/defines.v"
 module id(
@@ -40,8 +41,8 @@ module id(
     output[`InstAddrBus]        instaddr_o      ,
     output[`RegBus]             op1_o           ,
     output[`RegBus]             op2_o           ,
-    output[`RegBus]             id_rs1_data_o   ,//
-    output[`RegBus]             id_rs2_data_o   ,//
+    output[`RegBus]             id_rs1_data_o   ,
+    output[`RegBus]             id_rs2_data_o   ,
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
 
@@ -98,7 +99,7 @@ module id(
 
     //id 暂停流水线 load冒险
     assign hold_flag_o = (rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg && last_opcode == `INST_TYPE_L) 
-                        || (rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg || last_opcode == `INST_TYPE_L);
+                        || (rs2_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs2_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg && last_opcode == `INST_TYPE_L);
 
     //op1 
     assign op1 = ((rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg) ? ex_wr_data_i :
@@ -164,6 +165,16 @@ module id(
                         op1_o = op1;//rs1_data_i
                         op2_o = op2;//rs2_data_i
                         regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
+                    end
+                    `INST_MUL,`INST_MULH,`INST_MULHSU,`INST_MULHU,`INST_DIV,`INST_DIVU,`INST_REM,`INST_REMU:begin
+                        rs1_addr_o = rs1;
+                        rs2_addr_o = rs2;
+                        rs1_read_o = `ReadEnable;
+                        rs2_read_o = `ReadEnable;
+                        op1_o = op1;//rs1_data_i
+                        op2_o = op2;//rs2_data_i
+                        regs_wen_o = `WriteDisable;//not write now
                         rd_addr_o = rd;
                     end
                     //default
