@@ -150,6 +150,7 @@
 ### I型指令数据通路图
 数据通路的建立如图所示。
 ![](attachment/pipeline_i.png)
+
 - PC是程序计数器，用于指出指令的地址，即ROM的地址。
 - 程序存储在ROM中，目前用ROM代替。
 - EX用于进行运算
@@ -1137,7 +1138,11 @@ endmodule
 
 ### 访存指令数据通路图
 
-![image-20230324195541082](attachment/pipeline_load.png)
+![image-20230404105121391](attachment/ram.png)
+
+根据上图所示的sram读写时序，我们将RAM模块改为如下图所示的位置。
+
+![](attachment/pipeline_load1.png)
 
 ### load冒险
 
@@ -1174,7 +1179,7 @@ else if(id_hold_flag_i)begin//id普通的暂停 load
 ### 编译仿真结果
 
 - load，store指令均通过测试
-- 代码等文件参考“rtl_20230325_s"
+- 代码等文件参考“rtl_20230325_s2"
 
 
 

@@ -16,9 +16,8 @@
 // Date         Auther          Version                 Description
 // -----------------------------------------------------------------------
 // 2023-03-01   Deilt           1.0                     Original
-//  
+// 2023-03-25   Deilt           1.1
 // *********************************************************************************
-//这个有点问题读操作不能够一周期内读出
 module gnrl_ram 
 #(
     parameter DP = 512,             //RAM的深度（即RAM中可以存储多少个单元）。
@@ -42,17 +41,21 @@ module gnrl_ram
     wire [MW-1:0] wen;            //写使能信号，用于选择要写入的RAM单元
     wire ren;                     //读使能信号，用于控制读操作
 
+    wire [AW-1:0]     addr_r2;
+
     assign ren = cs & (~we);
     assign wen = ({MW{cs & we}} & wem);
 
+    assign addr_r2 = addr >> 2 ;
+
     genvar i;
 
-    always @(posedge clk)
+   /*  always @(posedge clk)
     begin
         if (ren) begin
-            addr_r <= addr;
+            addr_r <= addr_r2;
         end
-    end
+    end */
 
     //考虑了DW不是8的整数倍的时候，数据没有对齐则会使用第一种情况
     generate
@@ -60,14 +63,14 @@ module gnrl_ram
             if((8*i+8) > DW ) begin: last
             always @(posedge clk) begin
                 if (wen[i]) begin
-                mem_r[addr][DW-1:8*i] <= din[DW-1:8*i];
+                mem_r[addr_r2][DW-1:8*i] <= din[DW-1:8*i];
                 end
             end
             end
             else begin: non_last
             always @(posedge clk) begin
                 if (wen[i]) begin
-                mem_r[addr][8*i+7:8*i] <= din[8*i+7:8*i];
+                mem_r[addr_r2][8*i+7:8*i] <= din[8*i+7:8*i];
                 end
             end
             end
@@ -75,12 +78,12 @@ module gnrl_ram
     endgenerate
 
     wire [DW-1:0] dout_pre;
-    assign dout_pre = mem_r[addr_r];
+    assign dout_pre = mem_r[addr_r2];
 
     generate
     if(FORCE_X2ZERO == 1) begin: force_x_to_zero
         for (i = 0; i < DW; i = i+1) begin:force_x_gen 
-            `ifndef SYNTHESIS//{
+            `ifdef SYNTHESIS//{
                 assign dout[i] = (dout_pre[i] === 1'bx) ? 1'b0 : dout_pre[i];
             `else//}{
                 assign dout[i] = dout_pre[i];

@@ -1,7 +1,7 @@
 // *********************************************************************************
 // Project Name : Deilt_RISCV
-// File Name    : gnrl_ram.v
-// Module Name  : gnrl_ram
+// File Name    : gnrl_ram2.v
+// Module Name  : gnrl_ram2
 // Author       : Deilt
 // Email        : cjdeilt@qq.com
 // Website      : https://github.com/deilt/Deilt_RISCV
@@ -17,6 +17,7 @@
 // -----------------------------------------------------------------------
 // 2023-03-01   Deilt           1.0                     Original
 // 2023-03-25   Deilt           1.1
+// 2023-04-04   Deilt           1.2
 // *********************************************************************************
 module gnrl_ram 
 #(
@@ -50,12 +51,12 @@ module gnrl_ram
 
     genvar i;
 
-   /*  always @(posedge clk)
+     always @(posedge clk)
     begin
         if (ren) begin
             addr_r <= addr_r2;
         end
-    end */
+    end 
 
     //考虑了DW不是8的整数倍的时候，数据没有对齐则会使用第一种情况
     generate
@@ -78,7 +79,7 @@ module gnrl_ram
     endgenerate
 
     wire [DW-1:0] dout_pre;
-    assign dout_pre = mem_r[addr_r2];
+    assign dout_pre = mem_r[addr_r];
 
     generate
     if(FORCE_X2ZERO == 1) begin: force_x_to_zero
