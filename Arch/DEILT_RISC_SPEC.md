@@ -1208,7 +1208,7 @@ else if(id_hold_flag_i)begin//id普通的暂停 load
 `MUL`（乘(Multiply)）
 - mul rd, rs1, rs2
 - x[rd] = x[rs1] × x[rs2]
-- 把寄存器 x[rs2]乘到寄存器 x[rs1]上，乘积写入 x[rd]。忽略算术溢出。
+- 把寄存器 x[rs2]乘到寄存器 x[rs1]上，乘积写入 x[rd]。忽略算术溢出。无符号乘。
 ```
 
 ```

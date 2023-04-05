@@ -64,8 +64,19 @@ module ex(
     output[`RegBus]                 div_dividend_o  ,//被除数
     output[`RegBus]                 div_divisor_o   ,//除数
     output[2:0]                     div_op_o        ,//除法指令
-    output[`RegAddrBus]             div_reg_waddr_o  //最终写回的地址
+    output[`RegAddrBus]             div_reg_waddr_o , //最终写回的地址
 
+    //from mul
+    input                           mul_ready_i     ,//完成计算
+    input[`RegBus]                  mul_res_i       ,//resul
+    input                           mul_busy_i      ,//进行中
+    input[`RegAddrBus]              mul_reg_waddr_i ,
+    //to mul
+    output                          mul_start_o     ,//开始运算标志
+    output[`RegBus]                 mul_multiplicand_o  ,//
+    output[`RegBus]                 mul_multiplier_o   ,//
+    output[2:0]                     mul_op_o        ,//
+    output[`RegAddrBus]             mul_reg_waddr_o  //最终写回的地址
 );
     reg [`InstBus]              inst_o;
     reg [`InstAddrBus]          instaddr_o_d;
@@ -122,32 +133,47 @@ module ex(
     reg                         div_hold_flag;
     reg[`InstAddrBus]           div_jump_base;
     reg[`InstAddrBus]           div_jump_ofst;
-    reg[`InstAddrBus]           div_instaddr;
-    
+    reg[`InstAddrBus]           div_instaddr;//正在进行除法的指令地址
+    //mul
+    reg                         mul_start_o    ;
+    reg[`RegBus]                multiplicand_o;
+    reg[`RegBus]                multiplier_o  ;
+    reg[2:0]                    mul_op_o       ;
+    reg[`RegAddrBus]            mul_reg_waddr_o;
+
+    reg                         mul_wen;
+    reg[`RegBus]                mul_wdata;
+    reg[`RegAddrBus]            mul_waddr;
+
+    reg                         mul_jump_en;
+    reg                         mul_hold_flag;
+    reg[`InstAddrBus]           mul_jump_base;
+    reg[`InstAddrBus]           mul_jump_ofst;
+    reg[`InstAddrBus]           mul_instaddr;//正在进行的乘法指令地址
     
     //instaddr_o
-    assign instaddr_o = instaddr_o_d | div_instaddr;
+    assign instaddr_o = instaddr_o_d | div_instaddr | mul_instaddr;
 
     //rd_data_o
-    assign rd_data_o = rd_data | div_wdata;
+    assign rd_data_o = rd_data | div_wdata | mul_instaddr;
 
     //jump_en_o
-    assign ex_jump_en_o = ex_jump_en || div_jump_en;
+    assign ex_jump_en_o = ex_jump_en || div_jump_en || mul_jump_en;
 
     //ex_hold_flag_o
-    assign ex_hold_flag_o = ex_hold_flag || div_hold_flag;
+    assign ex_hold_flag_o = ex_hold_flag || div_hold_flag || mul_hold_flag;
 
     //ex_jump_base
-    assign ex_jump_base_o = ex_jump_base | div_jump_base ;
+    assign ex_jump_base_o = ex_jump_base | div_jump_base | mul_jump_base;
 
     //ex_jump_ofst_o
-    assign ex_jump_ofst_o = ex_jump_ofst | div_jump_ofst;
+    assign ex_jump_ofst_o = ex_jump_ofst | div_jump_ofst | mul_jump_ofst;
 
     //reg_wen_o
-    assign regs_wen_o = regs_wen || div_wen;
+    assign regs_wen_o = regs_wen || div_wen || mul_wen;
 
     //rd_addr_o
-    assign rd_addr_o = rd_addr | div_waddr;
+    assign rd_addr_o = rd_addr | div_waddr | mul_waddr;
 
     //----------------------------------------
     //add 
@@ -211,13 +237,66 @@ module ex(
     
     //-----------------------------------------
     //MUL
-    
+    always @(*)begin
+        multiplicand_o = op1_i;
+        multiplier_o = op2_i;
+        mul_op_o = funct3;
+        mul_reg_waddr_o = rd_addr_i;
+        if((opcode == `INST_TYPE_R_M) && (funct7 == 7'b0000001))begin
+            mul_wen = `WriteDisable;
+            mul_waddr = `ZeroWord;
+            mul_wdata = `ZeroWord;
+            mul_instaddr = instaddr_i;//锁存
+            case(funct3)
+                `INST_MUL,`INST_MULH,`INST_MULHU,`INST_MULHSU:begin
+                    mul_start_o = 1'b1;
+                    mul_jump_en = `JumpEnable;
+                    mul_hold_flag = `HoldEnable;
+                    mul_jump_base = instaddr_i ;
+                    mul_jump_ofst = 32'h4;
+                end
+                default:begin
+                    mul_start_o = 1'b0;
+                    mul_jump_en = `JumpDisable;
+                    mul_hold_flag = `HoldDisable;
+                    mul_jump_base = `ZeroWord ;
+                    mul_jump_ofst = 32'h0;
+                end
+            endcase
+        end 
+        else begin 
+            mul_jump_en = `JumpDisable;
+            mul_jump_base = `ZeroWord;
+            mul_jump_ofst = `ZeroWord;
+            if(mul_busy_i == 1'b1)begin //计算中
+                mul_start_o = 1'b1;
+                mul_wen = `WriteDisable;
+                mul_wdata = `ZeroWord;
+                mul_waddr = `ZeroReg;
+                mul_hold_flag = `HoldEnable;
+            end
+            else begin//计算结束，或者非除法
+                mul_instaddr = `ZeroWord;
+                mul_start_o = 1'b0;
+                mul_hold_flag = `HoldDisable;
+                if(mul_ready_i == 1'b1)begin //计算结束
+                    mul_wen = `WriteEnable;
+                    mul_waddr = mul_reg_waddr_i;
+                    mul_wdata = mul_res_i;
+                end
+                else begin //非除法
+                    mul_wen = `WriteDisable;
+                    mul_waddr = `ZeroReg;
+                    mul_wdata = `ZeroWord;
+                end
+            end
+        end
+    end
     //----------------------------------------
 
 
     //-----------------------------------------
     //DIV
-    
     always @(*)begin
         div_dividend_o = op1_i;
         div_divisor_o  = op2_i;
@@ -242,7 +321,6 @@ module ex(
                     div_hold_flag = `HoldDisable;
                     div_jump_base = `ZeroWord;
                     div_jump_ofst = 32'h0;
-                    div_jump_base = `ZeroWord;
                 end
             endcase 
         end
@@ -375,18 +453,6 @@ module ex(
                             rd_data = `ZeroReg;
                         end
                     endcase 
-                end
-                else begin
-                    case(funct3)
-                        `INST_MUL:begin
-                        end
-                        `INST_MULH:begin
-                        end
-                        `INST_MULHSU:begin
-                        end
-                        `INST_MULHU:begin
-                        end
-                    endcase
                 end
             end
             `INST_JAL:begin
