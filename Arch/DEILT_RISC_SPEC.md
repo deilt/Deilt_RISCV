@@ -1342,17 +1342,20 @@ $\begin{aligned}&\quad（-y_{7}\times 2^{7}+y_{6}\times 2^{6}+\ldots +y_{1}\time
 
 ![image-20230404164927904](attachment/div.png)
 
-### 指令数据通路图
 
 
+### 3.4 指令数据通路图
 
-### verilog代码实现
+![](attachment/pipeline_mdu1.png)
 
+### 3.5 RTL代码实现
 
+具体代码参考EX_MDU模块
 
-### 编译仿真结果
+### 3.6 编译仿真结果
 
-
+- 除法指令均通过测试
+- 
 
 
 
