@@ -67,16 +67,16 @@ module ex(
     output[`RegAddrBus]             div_reg_waddr_o , //最终写回的地址
 
     //from mul
-    input                           mul_ready_i     ,//完成计算
-    input[`RegBus]                  mul_res_i       ,//resul
-    input                           mul_busy_i      ,//进行中
-    input[`RegAddrBus]              mul_reg_waddr_i ,
+    input                           mul_ready_i         ,//完成计算
+    input[`RegBus]                  mul_res_i           ,//resul
+    input                           mul_busy_i          ,//进行中
+    input[`RegAddrBus]              mul_reg_waddr_i     ,
     //to mul
-    output                          mul_start_o     ,//开始运算标志
+    output                          mul_start_o         ,//开始运算标志
     output[`RegBus]                 mul_multiplicand_o  ,//
-    output[`RegBus]                 mul_multiplier_o   ,//
-    output[2:0]                     mul_op_o        ,//
-    output[`RegAddrBus]             mul_reg_waddr_o  //最终写回的地址
+    output[`RegBus]                 mul_multiplier_o    ,//
+    output[2:0]                     mul_op_o            ,//
+    output[`RegAddrBus]             mul_reg_waddr_o     //最终写回的地址
 );
     reg [`InstBus]              inst_o;
     reg [`InstAddrBus]          instaddr_o_d;
@@ -136,8 +136,8 @@ module ex(
     reg[`InstAddrBus]           div_instaddr;//正在进行除法的指令地址
     //mul
     reg                         mul_start_o    ;
-    reg[`RegBus]                multiplicand_o;
-    reg[`RegBus]                multiplier_o  ;
+    reg[`RegBus]                mul_multiplicand_o;
+    reg[`RegBus]                mul_multiplier_o  ;
     reg[2:0]                    mul_op_o       ;
     reg[`RegAddrBus]            mul_reg_waddr_o;
 
@@ -155,7 +155,7 @@ module ex(
     assign instaddr_o = instaddr_o_d | div_instaddr | mul_instaddr;
 
     //rd_data_o
-    assign rd_data_o = rd_data | div_wdata | mul_instaddr;
+    assign rd_data_o = rd_data | div_wdata | mul_wdata;
 
     //jump_en_o
     assign ex_jump_en_o = ex_jump_en || div_jump_en || mul_jump_en;
@@ -238,15 +238,14 @@ module ex(
     //-----------------------------------------
     //MUL
     always @(*)begin
-        multiplicand_o = op1_i;
-        multiplier_o = op2_i;
+        mul_multiplicand_o = op1_i;
+        mul_multiplier_o = op2_i;
         mul_op_o = funct3;
         mul_reg_waddr_o = rd_addr_i;
         if((opcode == `INST_TYPE_R_M) && (funct7 == 7'b0000001))begin
             mul_wen = `WriteDisable;
             mul_waddr = `ZeroWord;
             mul_wdata = `ZeroWord;
-            mul_instaddr = instaddr_i;//锁存
             case(funct3)
                 `INST_MUL,`INST_MULH,`INST_MULHU,`INST_MULHSU:begin
                     mul_start_o = 1'b1;
@@ -254,6 +253,7 @@ module ex(
                     mul_hold_flag = `HoldEnable;
                     mul_jump_base = instaddr_i ;
                     mul_jump_ofst = 32'h4;
+                    //mul_instaddr = instaddr_i;//锁存
                 end
                 default:begin
                     mul_start_o = 1'b0;
@@ -275,10 +275,10 @@ module ex(
                 mul_waddr = `ZeroReg;
                 mul_hold_flag = `HoldEnable;
             end
-            else begin//计算结束，或者非除法
-                mul_instaddr = `ZeroWord;
+            else if(mul_busy_i == 1'b0)begin//计算结束，或者非除法
                 mul_start_o = 1'b0;
                 mul_hold_flag = `HoldDisable;
+                //mul_instaddr = `ZeroWord;
                 if(mul_ready_i == 1'b1)begin //计算结束
                     mul_wen = `WriteEnable;
                     mul_waddr = mul_reg_waddr_i;
@@ -293,7 +293,20 @@ module ex(
         end
     end
     //----------------------------------------
-
+    //mul 锁存地址，因为锁存sim报错，只能时序解决，div没报错
+    always @(posedge clk or negedge rstn)begin
+        if(rstn == `RstEnable)begin
+            mul_instaddr <= 0;
+        end
+        else if(mul_busy_i == 0 && mul_start_o == 1)begin
+            mul_instaddr <= instaddr_i;
+        end
+        else if(mul_busy_i == 0 && mul_ready_i ==1)begin
+            mul_instaddr <= `ZeroWord;
+        end
+        else 
+            mul_instaddr <= mul_instaddr;
+        end
 
     //-----------------------------------------
     //DIV
@@ -306,7 +319,6 @@ module ex(
             div_wen = `WriteDisable;
             div_waddr = `ZeroWord;
             div_wdata = `ZeroWord;
-            div_instaddr = instaddr_i;//锁存
             case(funct3)
                 `INST_DIV,`INST_DIVU,`INST_REM,`INST_REMU:begin
                     div_start_o = 1'b1;
@@ -314,6 +326,7 @@ module ex(
                     div_hold_flag = `HoldEnable;
                     div_jump_base = instaddr_i;
                     div_jump_ofst = 32'h4;
+                    div_instaddr = instaddr_i;//锁存
                 end
                 default:begin
                     div_start_o = 1'b0;

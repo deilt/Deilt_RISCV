@@ -15,10 +15,14 @@
 ../rtl/core/wb.v
 ../rtl/core/prdct.v
 ../rtl/core/ctrl.v
+../rtl/core/ex_mdu.v
+../rtl/core/ex_mul.v
+
 
 ../rtl/general/gnrl_dffs.v
 ../rtl/general/gnrl_xchecker.v
 ../rtl/general/gnrl_ram.v
+../rtl/general/gnrl_ram2.v
 
 ../tb/core_tb.v
 

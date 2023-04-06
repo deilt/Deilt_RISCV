@@ -35,7 +35,7 @@
 - RV32I（40条指令）（32位通用寄存器,基础整数指令集）
 - 拓展指令Ｍ，乘除拓展（4条乘法，2条除法，2条取余），试商法实现除法运算
 - 仅支持机器模式（Machine Mode）
-- 配备完整的ITCM 和DTCM(Sram)
+- 配备完整的ITCM 和DTCM(Sram)？
 - verilog 2001语法编写
 - 支持中断
 - 模块与模块的接口均采用严谨的 valid-ready 握手接口
@@ -46,7 +46,7 @@
 ## 2 Architecture
 
 ![](./Arch/attachment/deilt_riscv_arch-16794540063221.png)
-![](./Arch/attachment/pipeline_load.png)
+![](./Arch/attachment/pipeline_load1.png)
 
 ## 3 工程目录文件说明
 
@@ -132,7 +132,7 @@ Deilt_RISC
 >- 搭建了基础的架构
 >- 初步确定了deilt_risc的实现功能及要求
 >- 初步撰写了deilt_risc的设计文稿
->- 下一步目标是设计数据通路，从零到一实现Deilt_Risc
+>- 下一步目标是设计数据通路，从零到一实现DEILT_RISCV
 
 ## 2023/03/08-03/13
 
@@ -158,7 +158,7 @@ Deilt_RISC
 
 >- 文档中对流水线暂停，及分支预测进行了说明
 >- 修改流水线数据通路图，添加了CTRL和PRDCT模块
->- 修改rtl代码，加入CREL模块和PRDCT模块
+>- 修改rtl代码，加入CTRL模块和PRDCT模块
 >- 指令中加入了分支跳转指令
 >- 指令中加入了U型指令
 >- debug
@@ -169,3 +169,11 @@ Deilt_RISC
 >- 实现LOAD，STORE指令
 >- 添加了ID模块的暂停流水线
 >- 以上所有指令均完成编译仿真测试
+
+## 2023/04/03-2023/04/6
+
+>- 更改了RAM的实现方式，之前的RAM没有考虑读的延迟一拍
+>- 实现了乘法除法，且通过测试
+>- 至此，完成了所有的I、M指令的数据通路建立，且完成仿真测试。
+>- 指令测试均采用开源的RISCV_TESTs测试
+

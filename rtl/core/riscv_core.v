@@ -72,14 +72,20 @@ module riscv_core(
     wire [`RegBus]              ex_rd_data_o;
     wire                        ex_hold_flag_o;
 
-    wire                          ex_jump_en_o;
-    wire[`InstAddrBus]            ex_jump_base_o;
-    wire[`InstAddrBus]            ex_jump_ofst_o;
-    wire                          div_start_o;
-    wire[`RegBus]                 div_dividend_o;
-    wire[`RegBus]                 div_divisor_o;
-    wire[2:0]                     div_op_o;
-    wire[`RegAddrBus]             div_reg_waddr_o;
+    wire                        ex_jump_en_o;
+    wire[`InstAddrBus]          ex_jump_base_o;
+    wire[`InstAddrBus]          ex_jump_ofst_o;
+    wire                        div_start_o;
+    wire[`RegBus]               div_dividend_o;
+    wire[`RegBus]               div_divisor_o;
+    wire[2:0]                   div_op_o;
+    wire[`RegAddrBus]           div_reg_waddr_o;
+
+    wire                        mul_start_o ;
+    wire[`RegBus]               mul_multiplicand_o;
+    wire[`RegBus]               mul_multiplier_o;
+    wire[2:0]                   mul_op_o;
+    wire[`RegAddrBus]           ex_mul_reg_waddr_o;
     //ex_mem
     wire [`InstBus]             ex_mem_inst_o;
     wire [`InstAddrBus]         ex_mem_instaddr_o;
@@ -124,10 +130,16 @@ module riscv_core(
     wire [`InstAddrBus]         prd_jump_ofset_o;
     
     //ex_mdu
-    wire[`RegBus]       mdu_result_o;
-    wire                mdu_ready_o;
-    wire                mdu_busy_o;
-    wire[`RegAddrBus]   mdu_reg_waddr_o;
+    wire[`RegBus]               mdu_result_o;
+    wire                        mdu_ready_o;
+    wire                        mdu_busy_o;
+    wire[`RegAddrBus]           mdu_reg_waddr_o;
+
+    //ex_mul
+    wire                        mul_ready_o;
+    wire[`RegBus]               mul_res_o;
+    wire                        mul_busy_o;
+    wire[`RegAddrBus]           mul_reg_waddr_o;
 
     //prd
     prdct u_prdct(
@@ -311,7 +323,16 @@ module riscv_core(
         .div_dividend_o (div_dividend_o     ),
         .div_divisor_o  (div_divisor_o      ),
         .div_op_o       (div_op_o           ),
-        .div_reg_waddr_o(div_reg_waddr_o    )
+        .div_reg_waddr_o(div_reg_waddr_o    ),
+        .mul_ready_i       (mul_ready_o     ), 
+        .mul_res_i         (mul_res_o       ),
+        .mul_busy_i        (mul_busy_o      ),
+        .mul_reg_waddr_i   (mul_reg_waddr_o ),
+        .mul_start_o       (mul_start_o     ),
+        .mul_multiplicand_o(mul_multiplicand_o),
+        .mul_multiplier_o  (mul_multiplier_o),
+        .mul_op_o          (mul_op_o        ),
+        .mul_reg_waddr_o   (ex_mul_reg_waddr_o)
     );
 
     //ex_mdu
@@ -329,6 +350,20 @@ module riscv_core(
         .reg_waddr_o    (mdu_reg_waddr_o    )
     );
 
+    //ex_mul
+    ex_mul u_ex_mul(
+        .clk                (clk                ),
+        .rstn               (rstn               ),
+        .mul_start_i        (mul_start_o        ),
+        .mul_multiplicand_i (mul_multiplicand_o ),
+        .mul_multiplier_i   (mul_multiplier_o   ),
+        .mul_op_i           (mul_op_o           ),
+        .mul_reg_waddr_i    (ex_mul_reg_waddr_o ),
+        .mul_ready_o        (mul_ready_o        ),
+        .mul_res_o          (mul_res_o          ),
+        .mul_busy_o         (mul_busy_o         ),
+        .mul_reg_waddr_o    (mul_reg_waddr_o    )
+    );
     //ex_mem
     ex_mem u_ex_mem(
         .clk            (clk                ),

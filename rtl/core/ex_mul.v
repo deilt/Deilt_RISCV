@@ -33,16 +33,32 @@ module ex_mul(
     output                              mul_busy_o          ,
     output[`RegAddrBus]                 mul_reg_waddr_o
 );
-    reg[`RegBus]                        mul_multiplicand;
-    reg[`RegBus]                        mul_multiplier  ;
-    wire[`RegBus]                       multiplicand_invert;
-    wire[`RegBus]                       multiplier_invert;
-    wire[63:0]                          result_inv;
+    reg[`RegBus]                        mul_multiplicand    ;
+    reg[`RegBus]                        mul_multiplier      ;
+    wire[`RegBus]                       multiplicand_invert ;
+    wire[`RegBus]                       multiplier_invert   ;
+    wire[63:0]                          result_inv          ;
 
-    reg                                 mul_ready_o;
-    reg[`RegBus]                        mul_res_o;
-    reg                                 mul_busy_o;
-    reg[`RegAddrBus]                    mul_reg_waddr_o;
+    reg                                 mul_ready_o         ;
+    reg[`RegBus]                        mul_res_o           ;
+    reg                                 mul_busy_o          ;
+    reg[`RegAddrBus]                    mul_reg_waddr_o     ;
+
+    //fsm
+    reg [1:0]       state;
+    reg [1:0]       next_state;
+    localparam  STATE_IDLE  = 2'b00;
+    localparam  STATE_START = 2'b01;
+    localparam  STATE_CACU  = 2'b10;
+    localparam  STATE_END   = 2'b11;
+
+    reg[63:0]       multiplicand;
+    reg[`RegBus]    multiplier;
+    reg             invert_result;
+
+    reg[5:0]        count;
+    reg[63:0]       result;
+    reg[2:0]        mul_op;
 
     assign  multiplicand_invert = ~mul_multiplicand_i + 1;
     assign  multiplier_invert = ~mul_multiplier_i + 1;
@@ -76,20 +92,30 @@ module ex_mul(
     end
 
     //fsm
-    reg [1:0]       state;
-    reg [1:0]       next_state;
-    localparam  STATE_IDLE  = 2'b00;
-    localparam  STATE_START = 2'b01;
-    localparam  STATE_CACU  = 2'b10;
-    localparam  STATE_END   = 2'b11;
 
-    reg[63:0]       multiplicand;
-    reg[`RegBus]    multiplier;
-    reg             invert_result;
 
-    reg[5:0]        count;
-    reg[63:0]       result;
-    reg[2:0]        mul_op;
+    //count
+    always @(posedge clk or negedge rstn)begin
+        if(rstn == `RstEnable)
+            count <= 6'h0;
+        else if(state == STATE_IDLE && state != next_state)begin
+            result <= 0;
+        end
+        else if(next_state == STATE_CACU)begin
+            count <= count + 1 ;
+            if(multiplier[0])begin
+                result = result + multiplicand;
+            end
+            else begin
+                result = result;
+            end
+            multiplicand = multiplicand << 1 ;
+            multiplier = multiplier >> 1;
+        end
+        else 
+            count <= 6'h0;
+    end
+
 
     always @(posedge clk or negedge rstn)begin
         if(rstn == `RstEnable)begin
@@ -112,7 +138,7 @@ module ex_mul(
                     multiplier = mul_multiplier;
                     mul_reg_waddr_o = mul_reg_waddr_i;
                     mul_op = mul_op_i;
-                    if(mul_multiplicand_i[31] ^ mul_multiplier_i[31])begin
+                    if(((mul_multiplicand_i[31] ^ mul_multiplier_i[31]) && mul_op_i != `INST_MULHSU) || (mul_op_i == `INST_MULHSU && mul_multiplicand_i[31] == 1'b1))begin
                         invert_result = 1'b1;
                     end
                     else begin
@@ -132,13 +158,9 @@ module ex_mul(
                 if(mul_start_i)begin
                     if(multiplicand == 64'h0 || multiplier == 32'h0)begin //zero
                         next_state = STATE_END;
-                        result = 64'h0;
                     end
                     else begin //not zero
                         next_state = STATE_CACU;
-                        count = 6'h0;
-                        result = 64'h0;
-                        i = 0;
                     end
                 end
                 else begin
@@ -150,15 +172,6 @@ module ex_mul(
                 if(mul_start_i)begin
                     if(count<32)begin
                         next_state = STATE_CACU;
-                        if(multiplier[0])begin
-                            result = result + multiplicand;
-                        end
-                        else begin
-                            result = result;
-                        end
-                        count = count + 1;
-                        multiplicand = multiplicand << 1 ;
-                        multiplier = multiplier >> 1;
                     end
                     else begin
                         next_state = STATE_END;
