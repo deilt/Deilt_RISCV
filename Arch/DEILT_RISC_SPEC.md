@@ -1356,6 +1356,7 @@ $\begin{aligned}&\quad（-y_{7}\times 2^{7}+y_{6}\times 2^{6}+\ldots +y_{1}\time
 - 乘法指令均通过测试
 - 乘法实现方式是普通乘法，移位叠加。日后将改进位booth两位乘实现。
 - 除法的实现是采用试商法
+- ECALL，EBREAK，FENCE后续完成
 
 
 
