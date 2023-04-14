@@ -1538,7 +1538,7 @@ RISC-V 架构规定，在处理器的程序执行过程中， 一旦遇到异常
 
 当程序完成异常处理之后，最终需要从异常服务程序中退出，并返回主程序 。 RISC-V 架构定义了一组专门的退出异常指令（ Trap-Return Instructions ），包括MRET、 SRET 、和 URET 。其中 **MRET** 指令是必备的。
 
-在机器模式下退出异常时，软件必须使用 h仅ET 指令 。 RISC-V 架构规定，处理器执行 h但ET 指令后的硬件行为如下 。
+在机器模式下退出异常时，软件必须使用 MRET 指令 。 RISC-V 架构规定，处理器执行 MRET 指令后的硬件行为如下 。
 
 - 停止执行当前程序流，转而从 CSR 寄存器 mepc 定义的 PC 地址开始执行 。
 - 硬件同时更新 CSR 寄存器机器模式状态寄存器 **mstatus** (Machine Status Register ） 。
