@@ -139,7 +139,72 @@
 `define INST_TYPE_LUI   7'b0110111
 `define INST_TYPE_AUIPC 7'b0010111
 
+// CSR inst
+`define INST_CSRRW              3'b001
+`define INST_CSRRS              3'b010
+`define INST_CSRRC              3'b011
+`define INST_CSRRWI             3'b101
+`define INST_CSRRSI             3'b110
+`define INST_CSRRCI             3'b111
 
+/*-------------------------- CSR reg addr -------------------------*/
+`define  CSR_MVENDORID_ADDR       12'hF11
+`define  CSR_MARCHID_ADDR         12'hF12
+`define  CSR_MIMPID_ADDR          12'hF13
+`define  CSR_MHARTID_ADDR         12'hF14
+
+/* ------ Machine trap setup ---------*/
+`define  CSR_MSTATUS_ADDR         12'h300
+`define  CSR_MISA_ADDR            12'h301
+`define  CSR_MIE_ADDR             12'h304
+`define  CSR_MTVEC_ADDR           12'h305
+`define  CSR_MCOUNTEREN_ADDR      12'h306
+`define  CSR_MCOUNTINHIBIT_ADDR   12'h320
+
+/* ------ Machine trap handling ------*/
+`define  CSR_MSCRATCH_ADDR        12'h340
+`define  CSR_MEPC_ADDR            12'h341
+`define  CSR_MCAUSE_ADDR          12'h342
+`define  CSR_MTVAL_ADDR           12'h343
+`define  CSR_MIP_ADDR             12'h344
+
+`define  CSR_CYCLE_ADDR           12'hc00
+`define  CSR_CYCLEH_ADDR          12'hc80
+`define  CSR_MCYCLE_ADDR          12'hB00
+`define  CSR_MCYCLEH_ADDR         12'hB80
+`define  CSR_MINSTRET_ADDR        12'hB02
+`define  CSR_MINSTRETH_ADDR       12'hB82
+/* -------- Debug trigger -----------*/
+`define  CSR_TSELECT_ADDR         12'h7A0
+`define  CSR_TDATA1_ADDR          12'h7A1
+`define  CSR_TDATA2_ADDR          12'h7A2
+`define  CSR_TDATA3_ADDR          12'h7A3
+`define  CSR_MCONTEXT_ADDR        12'h7A8
+`define  CSR_SCONTEXT_ADDR        12'h7AA
+
+/* -------- Debug/trace -------------*/
+`define  CSR_DCSR_ADDR            12'h7b0
+`define  CSR_DPC_ADDR             12'h7b1
+
+/* ------------ Debug ----------------*/
+`define  CSR_DSCRATCH0_ADDR       12'h7b2
+`define  CSR_DSCRATCH1_ADDR       12'h7b3
+
+
+/* --------------config parameters -----------*/
+`define  REBOOT_ADDR              32'h80         //  32'h80 for c-test program, 32'h00000000: for isa test
+`define  MTVEC_RESET              32'h00000001
+
+//exception
+`define InstValid       1'b0
+`define InstInvalid     1'b1
+`define TrapAssert      1'b1
+`define TrapNotAssert   1'b0
+
+
+//interrupt
+`define InterruptAssert      1'b1
+`define InterruptNotAssert   1'b1
 
 
 //JTAG
