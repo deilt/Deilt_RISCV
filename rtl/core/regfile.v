@@ -43,7 +43,7 @@ module regfile(
     always @(*)begin
         if(rstn == `RstEnable)
             rs1_data_o = `ZeroReg ;
-        else if(wen == `WriteEnable && wr_addr_i == rs1_addr_i && rs1_read_i == `ReadEnable && wr_addr_i != `ZeroRegAddr)
+        else if(wen == `WriteEnable && wr_addr_i == rs1_addr_i && rs1_read_i == `ReadEnable && wr_addr_i != `ZeroRegAddr) //from wb
             rs1_data_o = wr_data_i;
         else if(rs1_read_i == `ReadEnable && rs1_addr_i != `ZeroRegAddr)
             rs1_data_o = regs_mem[rs1_addr_i];
