@@ -46,6 +46,8 @@
 ![](./Arch/attachment/deilt_riscv_arch-16794540063221.png)
 ![](./Arch/attachment/pipeline_load1.png)
 
+![image-20230417221332478](Arch/attachment/main_1.png)
+
 ## 3 工程目录文件说明
 
 ```
