@@ -30,6 +30,10 @@ module mem(
     input[`RegAddrBus]          rd_addr_i       ,
     input[`RegBus]              rd_data_i       ,
     input[`MemAddrBus]          mem_addr_i      ,
+
+    input                       csr_wen_i       ,   //add
+    input[`CsrRegAddrBus]       csr_wr_addr_i   ,
+    input[`CsrRegBus]           csr_wr_data_i   ,
     //from ram
     input[`MemBus]              mem_data_i      ,
     //to mem_wb
@@ -37,7 +41,12 @@ module mem(
     output[`InstAddrBus]        instaddr_o      ,
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
-    output[`RegBus]             rd_data_o       
+    output[`RegBus]             rd_data_o       ,
+
+    output                      csr_wen_o       ,   //add
+    output[`CsrRegAddrBus]      csr_wr_addr_o   ,
+    output[`CsrRegBus]          csr_wr_data_o 
+
 );
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
@@ -116,4 +125,8 @@ module mem(
     assign inst_o       = inst_i;
     assign instaddr_o   = instaddr_i;
 
+    //csr
+    assign csr_wen_o = csr_wen_i;
+    assign csr_wr_addr_o = csr_wr_addr_i;
+    assign csr_wr_data_o = csr_wr_data_i;
 endmodule

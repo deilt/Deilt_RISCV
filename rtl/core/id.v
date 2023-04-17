@@ -56,17 +56,36 @@ module id(
     input[`RegAddrBus]          mem_wr_addr_i   ,
     input[`RegBus]              mem_wr_data_i   ,
     //to ctrl
-    output                      hold_flag_o 
+    output                      hold_flag_o     ,
+    //to csr
+    output[`CsrRegAddrBus]      csr_addr_o          ,
+    output                      csr_read_o          ,
+    //from csr
+    input[`CsrRegBus]           csr_data_i          ,
+    //to id_ex
+    output                      csr_wen_o           ,
+    output[`CsrRegAddrBus]      csr_wen_addr_o      ,
+    output[`CsrRegBus]          csr_data_o          ,
+    //from ex
+    input                       ex_csr_wen_i        ,
+    input[`CsrRegAddrBus]       ex_csr_wr_addr_i    ,
+    input[`CsrRegBus]           ex_csr_wr_data_i    ,
+    //from mem
+    input                       mem_csr_wen_i       ,
+    input[`CsrRegAddrBus]       mem_csr_wr_addr_i   ,
+    input[`CsrRegBus]           mem_csr_wr_data_i
 );
 
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
     wire [6:0]  funct7 = inst_i[31:25];
     wire [4:0]  rs1    = inst_i[19:15];
+    //wire [4:0]  zimm   = inst_i[19:15];
     wire [4:0]  rs2    = inst_i[24:20]; //rs2 or shamt,they'r equal
     //wire [4:0]  shamt  = inst_i[24:20]; //rs2 or shamt,they'r equal
     wire [4:0]  rd     = inst_i[11:7];
     wire [11:0] imm    = inst_i[31:20];
+    wire [11:0] csr    = inst_i[31:20];
     wire [31:0] sign_expd_imm = {{20{inst_i[31]}},inst_i[31:20]};
     wire [31:0] sign_expd_imm_s = {{20{inst_i[31]}},inst_i[31:25],inst_i[11:7]};
     wire [6:0]  last_opcode = ex_inst_i[6:0];
@@ -112,8 +131,16 @@ module id(
                  ((rs2_read_o == `ReadEnable && mem_wen_i == `WriteEnable && rs2_addr_o == mem_wr_addr_i && mem_wr_addr_i != `ZeroReg) ? mem_wr_data_i :
                  (rs2_read_o == `ReadEnable ? rs2_data_i : `ZeroWord)));
 
+    
     assign id_rs1_data_o = op1;
     assign id_rs2_data_o = op2;
+
+    //csr_data interrupt
+    wire csr_data;
+    assign csr_data = ((csr_read_o == `ReadEnable && ex_csr_wen_i == `WriteEnable && csr_addr_o == ex_csr_wr_addr_i && ex_csr_wr_addr_i != `ZeroReg) ? ex_csr_wr_data_i :
+                      ((csr_read_o == `ReadEnable && mem_csr_wen_i == `WriteEnable && csr_addr_o == mem_csr_wr_addr_i && mem_csr_wr_addr_i != `ZeroReg) ? mem_csr_wr_data_i :
+                      ((csr_read_o == `ReadEnable) ? csr_data_i : `ZeroWord)));
+    assign csr_data_o = csr_data;
 
     //decode
     always @(*)begin
@@ -128,6 +155,11 @@ module id(
         op2_o = `ZeroWord;
         regs_wen_o = `WriteDisable;
         rd_addr_o = `ZeroReg;
+
+        csr_read_o = `ReadDisable;
+        csr_addr_o = `ZeroReg;
+        csr_wen_o = `WriteDisable;
+        csr_wen_addr_o = `ZeroReg;
 
         case(opcode)
             `INST_TYPE_I:begin
@@ -259,6 +291,65 @@ module id(
                 //regs_wen_o = `WriteDisable;
                 //rd_addr_o = `ZeroReg;
             end
+            `INST_TYPE_CSR:begin
+                case(funct3)
+                    `INST_CSRRW,`INST_CSRRS:begin
+                        rs1_addr_o = rs1;
+                        //rs2_addr_o = `ZeroRegAddr;
+                        rs1_read_o = `ReadEnable;
+                        //rs2_read_o = `ReadDisable;
+
+                        op1_o = op1;//rs1_data
+                        op2_o = csr_data;//csr_data
+                        regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
+
+                        csr_read_o = `ReadEnable;
+                        csr_addr_o = csr;
+                        csr_wen_o = `WriteEnable;
+                        csr_wen_addr_o = csr;
+                    end
+                    `INST_CSRRC:begin
+                        rs1_addr_o = rs1;
+                        //rs2_addr_o = `ZeroRegAddr;
+                        rs1_read_o = `ReadEnable;
+                        //rs2_read_o = `ReadDisable;
+
+                        op1_o = ~op1;//rs1_data
+                        op2_o = csr_data;//csr_data
+                        regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
+
+                        csr_read_o = `ReadEnable;
+                        csr_addr_o = csr;
+                        csr_wen_o = `WriteEnable;
+                        csr_wen_addr_o = csr;
+                    end
+                    `INST_CSRRWI,`INST_CSRRSI:begin
+                        op1_o = {{27{1'b0}},zimm};
+                        op2_o = csr_data;
+                        regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
+
+                        csr_read_o = `ReadEnable;
+                        csr_addr_o = csr;
+                        csr_wen_o = `WriteEnable;
+                        csr_wen_addr_o = csr;
+                    end
+                    `INST_CSRRCI:begin
+                        op1_o = ~{{27{1'b0}},zimm};
+                        op2_o = csr_data;
+                        regs_wen_o = `WriteEnable;
+                        rd_addr_o = rd;
+
+                        csr_read_o = `ReadEnable;
+                        csr_addr_o = csr;
+                        csr_wen_o = `WriteEnable;
+                        csr_wen_addr_o = csr;
+                    end
+                endcase
+
+            end
             default:begin
                 rs1_addr_o = `ZeroRegAddr;
                 rs2_addr_o = `ZeroRegAddr;
@@ -272,11 +363,6 @@ module id(
             end
         endcase
     end
-
-
-
-
-
 
 
 

@@ -1671,6 +1671,12 @@ PLIC 是一个**存储器地址映射**的模块，挂载在处理器核为其�
 
 ![image-20230410160910023](attachment/csra.png)
 
+#### 5.4.7 CSR_INST
+
+![image-20230417141223779](attachment/csr_inst.png)
+
+![image-20230417152312184](attachment/csr_inst_1.png)
+
 
 
 # 6 总线

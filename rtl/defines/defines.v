@@ -72,6 +72,14 @@
 `define ReadEnable      1'b1
 `define ReadDisable     1'b0
 
+//CSR
+`define CsrRegAddrBus   11:0
+`define CsrRegAddrWidth 12
+`define CsrRegBus       31:0
+`define CsrRegWidth     32   
+`define CsrRegDepth     4096
+
+
 // I type inst
 `define INST_TYPE_I     7'b0010011
 
@@ -85,6 +93,7 @@
 `define INST_SLLI       3'b001  //逻辑左移 SLLI  slli rd, rs1, imm rd = rs1 << imm (低位补0)
 `define INST_SRLI       3'b101  //逻辑右移 SRLI  srli rd, rs1, imm rd = rs1 >> imm (高位补0)
 `define INST_SRAI       3'b101  //算术右移 符号位填充
+
 // R type inst
 `define INST_TYPE_R_M   7'b0110011
 
@@ -140,12 +149,13 @@
 `define INST_TYPE_AUIPC 7'b0010111
 
 // CSR inst
-`define INST_CSRRW              3'b001
-`define INST_CSRRS              3'b010
-`define INST_CSRRC              3'b011
-`define INST_CSRRWI             3'b101
-`define INST_CSRRSI             3'b110
-`define INST_CSRRCI             3'b111
+`define INST_TYPE_CSR           7'b1110011
+`define INST_CSRRW              3'b001      //csrrw rd, csr, rs1，作用是将csr寄存器的值读入rd，然后将rs1的值写入csr寄存器
+`define INST_CSRRS              3'b010      //将csr寄存器的值读入rd，然后将rs1的值与csr的值按位或后的结果写入csr寄存器
+`define INST_CSRRC              3'b011      //将csr寄存器的值读入rd，然后将rs1的值与csr的值按位与后的结果写入csr寄存器
+`define INST_CSRRWI             3'b101      //将csr寄存器的值读入rd，然后将0扩展后的imm的值写入csr寄存器
+`define INST_CSRRSI             3'b110      //将csr寄存器的值读入rd，然后将0扩展后的imm的值与csr的值按位或后的结果写入csr寄存器
+`define INST_CSRRCI             3'b111      //将csr寄存器的值读入rd，然后将0扩展后的imm的值与csr的值按位与后的结果写入csr寄存器
 
 /*-------------------------- CSR reg addr -------------------------*/
 `define  CSR_MVENDORID_ADDR       12'hF11

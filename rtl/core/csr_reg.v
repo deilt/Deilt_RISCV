@@ -19,21 +19,22 @@
 //  
 // *********************************************************************************
 module csr_reg(
-    input                           clk             ,
-    input                           rstn            ,
+    input                               clk             ,
+    input                               rstn            ,
     //from id
-    input[`RegAddrBus]              csr_addr_i      ,
-    input                           csr_read_i      ,
+    input[`CsrRegAddrBus]               csr_addr_i      ,
+    input                               csr_read_i      ,
 
     //to id
-    output[`RegBus]                 csr_data_o      ,
+    output[`CsrRegBus]                  csr_data_o      ,
     //from wb
-    input                           csr_wen         ,
-    input[`RegAddrBus]              csr_wr_addr_i   ,
-    input[`RegBus]                  csr_wr_data_i   
+    input                               csr_wen         ,
+    input[`CsrRegAddrBus]               csr_wr_addr_i   ,
+    input[`CsrRegBus]                   csr_wr_data_i   
 );
 
-    reg [`RegBus] csr_mem[`RegDepth-1:0] ;
+    reg [`CsrRegBus] csr_mem[`CsrRegDepth-1:0] ;
+    reg [`CsrRegBus]        csr_data_o;
 
     //read csr
     always @(*) begin
@@ -58,4 +59,9 @@ module csr_reg(
             csr_mem[csr_wr_addr_i] <= csr_wr_data_i;
         end
     end
+
+    //default value 
+
+    //regs value
+    
 endmodule

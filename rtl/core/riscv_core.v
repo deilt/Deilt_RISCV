@@ -44,9 +44,19 @@ module riscv_core(
     wire                        id_hold_flag_o;
     wire [`RegBus]              id_rs1_data_o;
     wire [`RegBus]              id_rs2_data_o;
+    wire[`CsrRegAddrBus]        id_csr_addr_o          ;
+    wire                        id_csr_read_o          ;
+    wire                        id_csr_wen_o           ;
+    wire[`CsrRegAddrBus]        id_csr_wen_addr_o      ;
+    wire[`CsrRegBus]            id_csr_data_o          ;
+
     //reg
     wire [`RegBus]              rs1_data_o;
     wire [`RegBus]              rs2_data_o;
+
+    //csr reg
+    wire[`CsrRegBus]                  csr_data_o      ;
+
     //id_ex
     wire [`InstBus]             id_ex_inst_o;
     wire [`InstAddrBus]         id_ex_instaddr_o;
@@ -57,6 +67,9 @@ module riscv_core(
     wire [`RegBus]              id_ex_rs1_data_o ;
     wire [`RegBus]              id_ex_rs2_data_o ;
     wire                        id_ex_jump_en_o;
+    wire                        id_ex_csr_wen_o       ;
+    wire[`CsrRegAddrBus]        id_ex_csr_wen_addr_o  ;
+    wire[`CsrRegBus]            id_ex_csr_data_o      ;
     //ex
     wire [`InstBus]             ex_inst_o;
     wire [`InstAddrBus]         ex_instaddr_o;
@@ -86,6 +99,10 @@ module riscv_core(
     wire[`RegBus]               mul_multiplier_o;
     wire[2:0]                   mul_op_o;
     wire[`RegAddrBus]           ex_mul_reg_waddr_o;
+    wire                        ex_csr_wen_o     ;   
+    wire[`CsrRegAddrBus]        ex_csr_wr_addr_o ;
+    wire[`CsrRegBus]            ex_csr_wr_data_o ;
+
     //ex_mem
     wire [`InstBus]             ex_mem_inst_o;
     wire [`InstAddrBus]         ex_mem_instaddr_o;
@@ -99,6 +116,9 @@ module riscv_core(
     wire                        ex_mem_regs_wen_o;
     wire [`RegAddrBus]          ex_mem_rd_addr_o;
     wire [`RegBus]              ex_mem_rd_data_o;
+    wire                        ex_mem_csr_wen_o     ;   
+    wire[`CsrRegAddrBus]        ex_mem_csr_wr_addr_o ;
+    wire[`CsrRegBus]            ex_mem_csr_wr_data_o ;
 
     //mem
     wire [`InstBus]             mem_inst_o;
@@ -106,7 +126,9 @@ module riscv_core(
     wire                        mem_regs_wen_o;
     wire [`RegAddrBus]          mem_rd_addr_o;
     wire [`RegBus]              mem_rd_data_o;
-    
+    wire                        mem_csr_wen_o       ;   
+    wire[`CsrRegAddrBus]        mem_csr_wr_addr_o   ;
+    wire[`CsrRegBus]            mem_csr_wr_data_o   ;
     //ram
     wire [`MemBus]              mem_data_o;
 
@@ -116,11 +138,17 @@ module riscv_core(
     wire                        mem_wb_regs_wen_o;
     wire [`RegAddrBus]          mem_wb_rd_addr_o;
     wire [`RegBus]              mem_wb_rd_data_o;
-
+    wire                        mem_wb_csr_wen_o       ;   
+    wire[`CsrRegAddrBus]        mem_wb_csr_wr_addr_o   ;
+    wire[`CsrRegBus]            mem_wb_csr_wr_data_o   ;
     //wb
     wire                        wb_regs_wen_o;
     wire [`RegAddrBus]          wb_rd_addr_o;
     wire [`RegBus]              wb_rd_data_o;
+    wire                        wb_csr_wen_o       ;   
+    wire[`CsrRegAddrBus]        wb_csr_wr_addr_o   ;
+    wire[`CsrRegBus]            wb_csr_wr_data_o   ;
+
     //ctrl
     wire [4:0]                  hold_en_o;
     wire                        prd_fail;
@@ -246,8 +274,21 @@ module riscv_core(
         .mem_wen_i      (mem_regs_wen_o     ),
         .mem_wr_addr_i  (mem_rd_addr_o      ),
         .mem_wr_data_i  (mem_rd_data_o      ),
-        .hold_flag_o    (id_hold_flag_o     )        
+        .hold_flag_o    (id_hold_flag_o     ),
+        .csr_addr_o       (id_csr_addr_o    ),
+        .csr_read_o       (id_csr_read_o    ),
+        .csr_data_i       (),
+        .csr_wen_o        (id_csr_wen_o     ),
+        .csr_wen_addr_o   (id_csr_wen_addr_o),
+        .csr_data_o       (id_csr_data_o    ),
+        .ex_csr_wen_i     (ex_csr_wen_o     ),
+        .ex_csr_wr_addr_i (ex_csr_wr_addr_o ),
+        .ex_csr_wr_data_i (ex_csr_wr_data_o ),
+        .mem_csr_wen_i    (mem_csr_wen_o    ),
+        .mem_csr_wr_addr_i(mem_csr_wr_addr_o),
+        .mem_csr_wr_data_i(mem_csr_wr_data_o)                
     );
+
     //reg
     regfile u_regfile(
         .clk            (clk                ),
@@ -263,8 +304,19 @@ module riscv_core(
         .wr_data_i      (wb_rd_data_o       )
     );
 
+    //csr reg
+    csr_reg u_csr_reg(
+        .clk            (clk                ),
+        .rstn           (rstn               ),
+        .csr_addr_i     (id_csr_addr_o      ),
+        .csr_read_i     (id_csr_read_o      ),
+        .csr_data_o     (csr_data_o         ),
+        .csr_wen        (wb_csr_wen_o       ),
+        .csr_wr_addr_i  (wb_csr_wr_addr_o   ),
+        .csr_wr_data_i  (wb_csr_wr_data_o   )
+    );
+
     //id_ex
-    
     id_ex u_id_ex(
         .clk            (clk                ),
         .rstn           (rstn               ),
@@ -276,6 +328,9 @@ module riscv_core(
         .rd_addr_i      (id_rd_addr_o       ),
         .rs1_data_i     (id_rs1_data_o      ),
         .rs2_data_i     (id_rs2_data_o      ),
+        .csr_wen_i      (id_csr_wen_o       ), 
+        .csr_wen_addr_i (id_csr_wen_addr_o  ), 
+        .csr_data_i     (id_csr_data_o      ),     
         .inst_o         (id_ex_inst_o       ),
         .instaddr_o     (id_ex_instaddr_o   ),
         .op1_o          (id_ex_op1_o        ),
@@ -284,6 +339,9 @@ module riscv_core(
         .rd_addr_o      (id_ex_rd_addr_o    ),
         .rs1_data_o     (id_ex_rs1_data_o   ),
         .rs2_data_o     (id_ex_rs2_data_o   ),
+        .csr_wen_o      (id_ex_csr_wen_o    ),
+        .csr_wen_addr_o (id_ex_csr_wen_addr_o),
+        .csr_data_o     (id_ex_csr_data_o   ),        
         .prd_jump_en_o  (id_ex_jump_en_o    ),
         .prd_jump_en_i  (prd_jump_en_o      ),
         .hold_en_i      (hold_en_o          )        
@@ -300,7 +358,10 @@ module riscv_core(
         .op1_i          (id_ex_op1_o        ), 
         .op2_i          (id_ex_op2_o        ), 
         .regs_wen_i     (id_ex_regs_wen_o   ), 
-        .rd_addr_i      (id_ex_rd_addr_o    ), 
+        .rd_addr_i      (id_ex_rd_addr_o    ),
+        .csr_wen_i      (id_ex_csr_wen_o    ),
+        .csr_wen_addr_i (id_ex_csr_wen_addr_o),
+        .csr_data_i     (id_ex_csr_data_o   ),      
         .inst_o         (ex_inst_o          ), 
         .instaddr_o     (ex_instaddr_o      ), 
         .cs_o           (cs_o               ), 
@@ -311,6 +372,9 @@ module riscv_core(
         .regs_wen_o     (ex_regs_wen_o      ), 
         .rd_addr_o      (ex_rd_addr_o       ), 
         .rd_data_o      (ex_rd_data_o       ),
+        .csr_wen_o      (ex_csr_wen_o       ),
+        .csr_wr_addr_o  (ex_csr_wr_addr_o   ),
+        .csr_wr_data_o  (ex_csr_wr_data_o   ),
         .ex_hold_flag_o (ex_hold_flag_o     ),
         .ex_jump_en_o   (ex_jump_en_o       ),
         .ex_jump_base_o (ex_jump_base_o     ),
@@ -378,6 +442,9 @@ module riscv_core(
         .regs_wen_i     (ex_regs_wen_o      ),
         .rd_addr_i      (ex_rd_addr_o       ),
         .rd_data_i      (ex_rd_data_o       ),
+        .csr_wen_i      (ex_csr_wen_o       ),
+        .csr_wr_addr_i  (ex_csr_wr_addr_o   ),
+        .csr_wr_data_i  (ex_csr_wr_data_o   ),
         .inst_o         (ex_mem_inst_o      ),
         .instaddr_o     (ex_mem_instaddr_o  ),
         //.cs_o           (ex_mem_cs_o        ),
@@ -388,6 +455,9 @@ module riscv_core(
         .regs_wen_o     (ex_mem_regs_wen_o  ),
         .rd_addr_o      (ex_mem_rd_addr_o   ),
         .rd_data_o      (ex_mem_rd_data_o   ),
+        .csr_wen_o      (ex_mem_csr_wen_o    ),
+        .csr_wr_addr_o  (ex_mem_csr_wr_addr_o),
+        .csr_wr_data_o  (ex_mem_csr_wr_data_o),        
         .hold_en_i      (hold_en_o          )
     );
 
@@ -401,12 +471,18 @@ module riscv_core(
         .rd_addr_i      (ex_mem_rd_addr_o   ), 
         .rd_data_i      (ex_mem_rd_data_o   ), 
         .mem_addr_i     (ex_mem_addr_o      ),
+        .csr_wen_i      (ex_mem_csr_wen_o    ),
+        .csr_wr_addr_i  (ex_mem_csr_wr_addr_o),
+        .csr_wr_data_i  (ex_mem_csr_wr_data_o),
         .mem_data_i     (mem_data_o         ), 
         .inst_o         (mem_inst_o         ), 
         .instaddr_o     (mem_instaddr_o     ), 
         .regs_wen_o     (mem_regs_wen_o     ), 
         .rd_addr_o      (mem_rd_addr_o      ), 
-        .rd_data_o      (mem_rd_data_o      )
+        .rd_data_o      (mem_rd_data_o      ),
+        .csr_wen_o      (mem_csr_wen_o      ),
+        .csr_wr_addr_o  (mem_csr_wr_addr_o  ),
+        .csr_wr_data_o  (mem_csr_wr_data_o  )
     );
 
     //ram
@@ -429,12 +505,18 @@ module riscv_core(
         .regs_wen_i     (mem_regs_wen_o     ),
         .rd_addr_i      (mem_rd_addr_o      ),
         .rd_data_i      (mem_rd_data_o      ),
+        .csr_wen_i      (mem_csr_wen_o      ),
+        .csr_wr_addr_i  (mem_csr_wr_addr_o  ),
+        .csr_wr_data_i  (mem_csr_wr_data_o  ),        
         .inst_o         (mem_wb_inst_o      ),
         .instaddr_o     (mem_wb_instaddr_o  ),
         .regs_wen_o     (mem_wb_regs_wen_o  ),
         .rd_addr_o      (mem_wb_rd_addr_o   ),
         .rd_data_o      (mem_wb_rd_data_o   ),
-        .hold_en_i      (hold_en_o          )
+        .hold_en_i      (hold_en_o          ),
+        .csr_wen_o      (mem_wb_csr_wen_o    ),
+        .csr_wr_addr_o  (mem_wb_csr_wr_addr_o),
+        .csr_wr_data_o  (mem_wb_csr_wr_data_o)
     );
 
     //wb
@@ -446,8 +528,14 @@ module riscv_core(
         .regs_wen_i     (mem_wb_regs_wen_o  ),
         .rd_addr_i      (mem_wb_rd_addr_o   ),
         .rd_data_i      (mem_wb_rd_data_o   ),
+        .csr_wen_i      (mem_wb_csr_wen_o    ),
+        .csr_wr_addr_i  (mem_wb_csr_wr_addr_o),
+        .csr_wr_data_i  (mem_wb_csr_wr_data_o),        
         .regs_wen_o     (wb_regs_wen_o      ),
         .rd_addr_o      (wb_rd_addr_o       ),
-        .rd_data_o      (wb_rd_data_o       )
+        .rd_data_o      (wb_rd_data_o       ),
+        .csr_wen_o      (wb_csr_wen_o       ),
+        .csr_wr_addr_o  (wb_csr_wr_addr_o   ),
+        .csr_wr_data_o  (wb_csr_wr_data_o   )
     );
 endmodule

@@ -31,6 +31,10 @@ module id_ex(
     input[`RegAddrBus]              rd_addr_i   ,
     input [`RegBus]                 rs1_data_i  ,
     input [`RegBus]                 rs2_data_i  ,
+
+    input                           csr_wen_i   ,
+    input[`CsrRegAddrBus]           csr_wen_addr_i ,
+    input[`CsrRegBus]               csr_data_i  ,
     //to ex
     output[`InstBus]                inst_o      ,
     output[`InstAddrBus]            instaddr_o  ,
@@ -40,6 +44,10 @@ module id_ex(
     output[`RegAddrBus]             rd_addr_o   ,
     output[`RegBus]                 rs1_data_o  ,
     output[`RegBus]                 rs2_data_o  ,
+
+    output                          csr_wen_o       ,
+    output[`CsrRegAddrBus]          csr_wen_addr_o  ,
+    output[`CsrRegBus]              csr_data_o      ,//data from csr
 
     output                          prd_jump_en_o,
     //from prd
@@ -94,4 +102,20 @@ module id_ex(
     reg [`RegBus]           rs2_data_r;
     gnrl_dfflr #(`RegWidth) rs2_data_gnrl_dfflr(clk,rstn,lden,rs2_data_i,rs2_data_r);
     assign rs2_data_o = rs2_data_r;
+
+    //csr_wen dff
+    reg                     csr_wen_r;
+    gnrl_dfflr #(1) csr_wen_gnrl_dfflr(clk,rstn,lden,csr_wen_i,csr_wen_r);
+    assign csr_wen_o = csr_wen_r;
+
+    //csr_data_o
+    reg [`CsrRegBus]           csr_data_r;
+    gnrl_dfflr #(`CsrRegWidth) csr_data_gnrl_dfflr(clk,rstn,lden,csr_data_i,csr_data_r);
+    assign csr_data_o = csr_data_r;
+
+    //csr_wen_addr_o
+    reg [`CsrRegAddrBus]       csr_wen_addr_r;
+    gnrl_dfflr #(`CsrRegAddrWidth) csr_wen_addr_gnrl_dfflr(clk,rstn,lden,csr_wen_addr_i,csr_wen_addr_r);
+    assign csr_wen_addr_o = csr_wen_addr_r;
+
 endmodule

@@ -34,6 +34,11 @@ module ex(
     input[`RegBus]                  op2_i       ,
     input                           regs_wen_i  ,
     input[`RegAddrBus]              rd_addr_i   ,
+
+    input                           csr_wen_i   ,   //add
+    input[`CsrRegAddrBus]           csr_wen_addr_i ,
+    input[`CsrRegBus]               csr_data_i  ,//may useless
+
     //to ex_mem
     output[`InstBus]                inst_o      ,
     output[`InstAddrBus]            instaddr_o  ,
@@ -47,6 +52,11 @@ module ex(
     output                          regs_wen_o  ,
     output[`RegAddrBus]             rd_addr_o   ,
     output[`RegBus]                 rd_data_o   ,
+
+    output                          csr_wen_o     ,   //add
+    output[`CsrRegAddrBus]          csr_wr_addr_o ,
+    output[`CsrRegBus]              csr_wr_data_o ,
+
     //to ctrl
     output                          ex_hold_flag_o  ,
 
@@ -82,6 +92,11 @@ module ex(
     reg [`InstAddrBus]          instaddr_o_d;
     reg                         regs_wen;
     reg [`RegAddrBus]           rd_addr;
+
+    reg                         csr_wen;
+    reg [`CsrRegAddrBus]        csr_wr_addr;
+    reg [`CsrRegBus]            csr_wr_data;
+
     reg                         ex_hold_flag;
     reg                         ex_jump_en;  
     reg [`InstAddrBus]          ex_jump_base;
@@ -367,6 +382,10 @@ module ex(
     end
     //----------------------------------------
 
+    //csr
+    assign csr_wen_o = csr_wen;
+    assign csr_wr_addr_o = csr_wr_addr;
+    assign csr_wr_data_o = csr_wr_data;
 
 
     //ex
@@ -387,6 +406,11 @@ module ex(
         mem_wem_o      = {`MemUnit{1'b0}};
         mem_din        = `ZeroWord;
         mem_addr_o     = `ZeroReg;
+
+        csr_wen = csr_wen_i;
+        csr_wr_addr = csr_wen_addr_i;
+        csr_wr_data = `ZeroWord;
+
         case(opcode)
             `INST_TYPE_I:begin
                 case(funct3)
@@ -585,6 +609,22 @@ module ex(
                     default:begin
                         mem_din    = `ZeroWord;
                         mem_wem_o  = 4'b0000;
+                    end
+                endcase
+            end
+            `INST_TYPE_CSR:begin
+                case(funct3)
+                    `INST_CSRRW,`INST_CSRRWI:begin
+                        rd_data = op2_i;//csr_data
+                        csr_wr_data = op1_i;//rs1_data
+                    end
+                    `INST_CSRRS,`INST_CSRRSI:begin
+                        rd_data = op2_i;//csr_data
+                        csr_wr_data = op1_or_op2;
+                    end
+                    `INST_CSRRC,`INST_CSRRCI:begin
+                        rd_data = op2_i;//csr_data
+                        csr_wr_data = op1_and_op2;
                     end
                 endcase
             end

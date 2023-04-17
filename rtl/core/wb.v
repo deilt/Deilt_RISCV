@@ -29,13 +29,27 @@ module wb(
     input                       regs_wen_i      ,
     input[`RegAddrBus]          rd_addr_i       ,
     input[`RegBus]              rd_data_i       ,
+
+    input                       csr_wen_i       ,   //add
+    input[`CsrRegAddrBus]       csr_wr_addr_i   ,
+    input[`CsrRegBus]           csr_wr_data_i   ,
+
     //to regs
     output                      regs_wen_o      ,
     output[`RegAddrBus]         rd_addr_o       ,
-    output[`RegBus]             rd_data_o       
+    output[`RegBus]             rd_data_o       ,
+
+    //to csr
+    output                      csr_wen_o       ,   //add
+    output[`CsrRegAddrBus]      csr_wr_addr_o   ,
+    output[`CsrRegBus]          csr_wr_data_o     
 );
     assign regs_wen_o = regs_wen_i;
     assign rd_addr_o  = rd_addr_i;
     assign rd_data_o  = rd_data_i; 
+    
+    assign csr_wen_o = csr_wen_i;
+    assign csr_wr_addr_o = csr_wr_addr_i;
+    assign csr_wr_data_o = csr_wr_data_i;
 
 endmodule

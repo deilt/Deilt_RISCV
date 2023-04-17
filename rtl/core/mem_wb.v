@@ -29,6 +29,11 @@ module mem_wb(
     input                       regs_wen_i      ,
     input[`RegAddrBus]          rd_addr_i       ,
     input[`RegBus]              rd_data_i       ,
+
+    input                       csr_wen_i       ,   //add
+    input[`CsrRegAddrBus]       csr_wr_addr_i   ,
+    input[`CsrRegBus]           csr_wr_data_i   ,
+
     //inst
     output[`InstBus]            inst_o          ,
     output[`InstAddrBus]        instaddr_o      ,
@@ -37,7 +42,12 @@ module mem_wb(
     output[`RegAddrBus]         rd_addr_o       ,
     output[`RegBus]             rd_data_o       ,
     //from ctrl
-    input[4:0]                  hold_en_i
+    input[4:0]                  hold_en_i       ,
+    //to csr
+    output                      csr_wen_o       ,   //add
+    output[`CsrRegAddrBus]      csr_wr_addr_o   ,
+    output[`CsrRegBus]          csr_wr_data_o 
+
 );
 
     wire                    lden ;
@@ -67,4 +77,18 @@ module mem_wb(
     reg [`RegBus]           rd_data_r;
     gnrl_dfflr #(`RegWidth) rd_data_gnrl_dfflr(clk,rstn,lden,rd_data_i,rd_data_r);
     assign rd_data_o = rd_data_r;    
+
+    reg                     csr_wen_r;
+    gnrl_dfflr #(1) csr_wen_gnrl_dfflr(clk,rstn,lden,csr_wen_i,csr_wen_r);
+    assign csr_wen_o = csr_wen_r;
+
+    //csr_wr_data_o
+    reg [`CsrRegBus]           csr_wr_data_r;
+    gnrl_dfflr #(`CsrRegWidth) csr_wr_data_gnrl_dfflr(clk,rstn,lden,csr_wr_data_i,csr_wr_data_r);
+    assign csr_wr_data_o = csr_wr_data_r;
+
+    //csr_wr_addr_o
+    reg [`CsrRegAddrBus]       csr_wr_addr_r;
+    gnrl_dfflr #(`CsrRegAddrWidth) csr_wr_addr_gnrl_dfflr(clk,rstn,lden,csr_wr_addr_i,csr_wr_addr_r);
+    assign csr_wr_addr_o = csr_wr_addr_r;
 endmodule
