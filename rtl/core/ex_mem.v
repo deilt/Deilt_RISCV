@@ -40,6 +40,7 @@ module ex_mem(
     input[`CsrRegAddrBus]          csr_wr_addr_i,
     input[`CsrRegBus]              csr_wr_data_i,
 
+    input [31:0]                    exception_i ,
     //to mem
     output[`InstBus]                inst_o      ,
     output[`InstAddrBus]            instaddr_o  ,
@@ -58,6 +59,7 @@ module ex_mem(
     output[`CsrRegAddrBus]          csr_wr_addr_o ,
     output[`CsrRegBus]              csr_wr_data_o ,
 
+    output [31:0]                   exception_o ,
     //from ctrl
     input[4:0]                      hold_en_i                           
 );
@@ -128,4 +130,8 @@ module ex_mem(
     gnrl_dfflr #(`CsrRegAddrWidth) csr_wr_addr_gnrl_dfflr(clk,rstn,lden,csr_wr_addr_i,csr_wr_addr_r);
     assign csr_wr_addr_o = csr_wr_addr_r;
 
+    //exception_o
+    reg [31:0]       exception_r;
+    gnrl_dfflr #(32) exception_gnrl_dfflr(clk,rstn,lden,exception_i,exception_r);
+    assign exception_o = exception_r;
 endmodule

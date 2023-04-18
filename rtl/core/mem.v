@@ -34,6 +34,8 @@ module mem(
     input                       csr_wen_i       ,   //add
     input[`CsrRegAddrBus]       csr_wr_addr_i   ,
     input[`CsrRegBus]           csr_wr_data_i   ,
+
+    input [31:0]                exception_i     ,
     //from ram
     input[`MemBus]              mem_data_i      ,
     //to mem_wb
@@ -45,13 +47,17 @@ module mem(
 
     output                      csr_wen_o       ,   //add
     output[`CsrRegAddrBus]      csr_wr_addr_o   ,
-    output[`CsrRegBus]          csr_wr_data_o 
+    output[`CsrRegBus]          csr_wr_data_o   ,
+    //to ctrl
+    output [31:0]               exception_o 
 
 );
     wire [6:0]  opcode = inst_i[6:0];
     wire [2:0]  funct3 = inst_i[14:12];
     wire [1:0]  mem_addr_index;
     reg [`MemBus]  mem_data;
+
+    assign exception_o = exception_i;
 
     assign mem_addr_index = mem_addr_i[1:0];
 
@@ -89,7 +95,7 @@ module mem(
                 `INST_LW:begin
                     mem_data = mem_data_i;
                 end
-                `ISNT_LBU:begin
+                `INST_LBU:begin
                     case(mem_addr_index)
                     2'b00: begin
                         mem_data = {{24{1'b0}}, mem_data_i[7:0]};
@@ -105,7 +111,7 @@ module mem(
                     end    
                     endcase
                 end
-                `ISNT_LHU:begin
+                `INST_LHU:begin
                     if(mem_addr_index == 2'b00)begin
                         mem_data = {{16{1'b0}}, mem_data_i[15:0]};
                     end

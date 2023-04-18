@@ -73,7 +73,9 @@ module id(
     //from mem
     input                       mem_csr_wen_i       ,
     input[`CsrRegAddrBus]       mem_csr_wr_addr_i   ,
-    input[`CsrRegBus]           mem_csr_wr_data_i
+    input[`CsrRegBus]           mem_csr_wr_data_i   ,
+
+    output [31:0]               exception_o         
 );
 
     wire [6:0]  opcode = inst_i[6:0];
@@ -109,12 +111,14 @@ module id(
     wire                        funct3_shamt;
 
     wire                        hold_flag_o;
-    // 产生扩展立即数判断
-    //assign funct3_sign_expd_imm = (opcode == `INST_TYPE_I && (funct3 == `INST_ADDI || funct3 == `INST_SLTI || funct3 == `INST_SLTIU || 
-                                    //funct3 == `INST_XORI || funct3 == `INST_ORI || funct3 == `INST_ANDI));
-    
-    //产生位移扩展判断
-    //assign funct3_shamt = (opcode == `INST_TYPE_I && (funct3 == `INST_SLLI || funct3 == `INST_SRLI));
+
+    reg                         excepttype_mret;
+    reg                         excepttype_ecall;
+    reg                         excepttype_ebreak;
+    reg                         excepttype_illegal_inst;
+
+    //exception ={ misaligned_load, misaligned_store, illegal_inst, misaligned_inst,  ebreak, ecall,  mret}
+    assign exception_o = {28'b0, excepttype_illegal_inst, excepttype_ebreak, excepttype_ecall, excepttype_mret};
 
     //id 暂停流水线 load冒险
     assign hold_flag_o = (rs1_read_o == `ReadEnable && ex_wen_i == `WriteEnable && rs1_addr_o == ex_wr_addr_i && ex_wr_addr_i != `ZeroReg && last_opcode == `INST_TYPE_L) 
@@ -161,6 +165,10 @@ module id(
         csr_wen_o = `WriteDisable;
         csr_wen_addr_o = `ZeroReg;
 
+        excepttype_mret = `False;
+        excepttype_ecall = `False;
+        excepttype_ebreak = `False;
+        excepttype_illegal_inst = `False;
         case(opcode)
             `INST_TYPE_I:begin
                 case(funct3)
@@ -184,7 +192,9 @@ module id(
                         regs_wen_o = `WriteEnable;
                         rd_addr_o = rd;
                     end
-                    //default
+                    default:begin
+                        excepttype_illegal_inst = `True;
+                    end
                 endcase
             end
             `INST_TYPE_R_M:begin
@@ -209,7 +219,9 @@ module id(
                         regs_wen_o = `WriteDisable;//not write now
                         rd_addr_o = rd;
                     end
-                    //default
+                    default:begin
+                        excepttype_illegal_inst = `True;
+                    end
                 endcase
             end
             `INST_JAL:begin
@@ -347,6 +359,20 @@ module id(
                         csr_wen_o = `WriteEnable;
                         csr_wen_addr_o = csr;
                     end
+                    `INST_CSR_SPECIAL:begin
+                        if((funct7 == 7'b0000000) && (rs2 == 5'b00000))begin //INST_ECALL
+                            excepttype_ecall = `True;
+                        end
+                        else if((funct7 == 7'b0000000) && (rs2 == 5'b00001))begin //INST_EBREAK
+                            excepttype_ebreak = `True;
+                        end 
+                        else if((funct7 == 7'b0011000) && (rs2 == 5'b00010))begin //INST_MRET
+                            excepttype_mret = `True;
+                        end
+                    end
+                    default:begin
+                        excepttype_illegal_inst = `True;
+                    end
                 endcase
 
             end
@@ -359,7 +385,9 @@ module id(
                 op1_o = `ZeroWord;
                 op2_o = `ZeroWord;
                 regs_wen_o = `WriteDisable;
-                rd_addr_o = `ZeroReg;    
+                rd_addr_o = `ZeroReg;
+                
+                excepttype_illegal_inst = `True;   
             end
         endcase
     end

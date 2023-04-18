@@ -35,6 +35,8 @@ module id_ex(
     input                           csr_wen_i   ,
     input[`CsrRegAddrBus]           csr_wen_addr_i ,
     input[`CsrRegBus]               csr_data_i  ,
+
+    input [31:0]                    exception_i ,
     //to ex
     output[`InstBus]                inst_o      ,
     output[`InstAddrBus]            instaddr_o  ,
@@ -50,6 +52,8 @@ module id_ex(
     output[`CsrRegBus]              csr_data_o      ,//data from csr
 
     output                          prd_jump_en_o,
+
+    output [31:0]                   exception_o ,
     //from prd
     input                           prd_jump_en_i,
     //from ctrl
@@ -118,4 +122,8 @@ module id_ex(
     gnrl_dfflr #(`CsrRegAddrWidth) csr_wen_addr_gnrl_dfflr(clk,rstn,lden,csr_wen_addr_i,csr_wen_addr_r);
     assign csr_wen_addr_o = csr_wen_addr_r;
 
+    //exception_o
+    reg [31:0]       exception_r;
+    gnrl_dfflr #(32) exception_gnrl_dfflr(clk,rstn,lden,exception_i,exception_r);
+    assign exception_o = exception_r;
 endmodule

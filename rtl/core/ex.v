@@ -39,6 +39,7 @@ module ex(
     input[`CsrRegAddrBus]           csr_wen_addr_i ,
     input[`CsrRegBus]               csr_data_i  ,//may useless
 
+    input [31:0]                    exception_i ,
     //to ex_mem
     output[`InstBus]                inst_o      ,
     output[`InstAddrBus]            instaddr_o  ,
@@ -57,6 +58,7 @@ module ex(
     output[`CsrRegAddrBus]          csr_wr_addr_o ,
     output[`CsrRegBus]              csr_wr_data_o ,
 
+    output [31:0]                   exception_o ,
     //to ctrl
     output                          ex_hold_flag_o  ,
 
@@ -102,8 +104,8 @@ module ex(
     reg [`InstAddrBus]          ex_jump_base;
     reg [`InstAddrBus]          ex_jump_ofst;
 
-    reg                         cs_o;
-    reg                         mem_we_o;
+    reg                         cs;
+    reg                         mem_we;
     reg [`MemUnit-1:0]          mem_wem_o;
     reg [`MemBus]               mem_din;
     reg [`MemAddrBus]           mem_addr_o;
@@ -166,6 +168,32 @@ module ex(
     reg[`InstAddrBus]           mul_jump_ofst;
     reg[`InstAddrBus]           mul_instaddr;//正在进行的乘法指令地址
     
+    wire  load_addr_align_exception;
+    wire  store_addr_align_exception;
+    wire  addr_align_halfword;
+    wire  addr_align_word;
+
+    // to ctrl module
+    assign load_operation = ((opcode == `INST_TYPE_L) && (funct3 == `INST_LW || funct3 == `INST_LH || funct3 == `INST_LHU)) ? 1'b1 : 1'b0;
+
+    assign store_operation = ((opcode == `INST_TYPE_S) && (funct3 == `INST_SW || funct3 == `INST_SH)) ? 1'b1 : 1'b0;
+
+    assign addr_align_halfword =((opcode == `INST_TYPE_S && funct3 == `INST_SH) || (opcode == `INST_TYPE_L && (funct3 == `INST_LH || funct3 == `INST_LHU))
+                                && (mem_addr_o[0] == 1'b0)) ? 1'b1 : 1'b0;
+
+    assign addr_align_halfword =((opcode == `INST_TYPE_S && funct3 == `INST_SW) || (opcode == `INST_TYPE_L && funct3 == `INST_LW)
+                                && (mem_addr_o[1:0] == 2'b00)) ? 1'b1 : 1'b0;
+
+    assign load_addr_align_exception = (~ (addr_align_halfword || addr_align_word)) & load_operation;
+    assign store_addr_align_exception = (~ (addr_align_halfword || addr_align_word)) & store_operation;
+
+    //exception ={ misaligned_load, misaligned_store, illegal_inst, misaligned_inst, ebreak, ecall, mret}
+    assign exception_o = {25'b0, load_addr_align_exception, store_addr_align_exception, exception_i[4:0]};
+
+    //mem_we_o
+    assign mem_we_o = mem_we & (~(|exception_o));
+    assign cs_o = cs & (~(|exception_o));
+
     //instaddr_o
     assign instaddr_o = instaddr_o_d | div_instaddr | mul_instaddr;
 
@@ -558,16 +586,16 @@ module ex(
             end
             `INST_TYPE_L:begin
                     //rd_data = `ZeroReg;
-                    cs_o       = `CsEnable;
-                    mem_we_o   = `WriteDisable;
+                    cs          = `CsEnable;
+                    mem_we     = `WriteDisable;
                     mem_din    = `ZeroWord;
                     mem_addr_o = op1_add_op2;
                     mem_wem_o  = 4'b0000;
             end
             `INST_TYPE_S:begin
                 //rd_data = `ZeroReg;
-                cs_o       = `CsEnable;
-                mem_we_o   = `WriteEnable;
+                cs       = `CsEnable;
+                mem_we   = `WriteEnable;
                 mem_addr_o = op1_add_op2;
                 case(funct3)
                     `INST_SB:begin

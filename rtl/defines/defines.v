@@ -22,7 +22,7 @@
 // 2023-03-24   Deilt           1.4
 // *********************************************************************************
 
-`define CpuResetAddr    32'h0
+`define CpuResetAddr    32'h80000000 //0x8000_0000 ~ 0x8001_FFFF
 `define RstEnable       1'b0 
 `define True            1'b1
 `define False           1'b0
@@ -135,8 +135,8 @@
 `define INST_LB         3'b000
 `define INST_LH         3'b001
 `define INST_LW         3'b010
-`define ISNT_LBU        3'b100
-`define ISNT_LHU        3'b101
+`define INST_LBU        3'b100
+`define INST_LHU        3'b101
 
 // S type inst
 `define INST_TYPE_S     7'b0100011
@@ -157,6 +157,7 @@
 `define INST_CSRRSI             3'b110      //将csr寄存器的值读入rd，然后将0扩展后的imm的值与csr的值按位或后的结果写入csr寄存器
 `define INST_CSRRCI             3'b111      //将csr寄存器的值读入rd，然后将0扩展后的imm的值与csr的值按位与后的结果写入csr寄存器
 
+`define INST_CSR_SPECIAL        3'b000
 /*-------------------------- CSR reg addr -------------------------*/
 `define  CSR_MVENDORID_ADDR       12'hF11
 `define  CSR_MARCHID_ADDR         12'hF12
@@ -178,6 +179,7 @@
 `define  CSR_MTVAL_ADDR           12'h343
 `define  CSR_MIP_ADDR             12'h344
 
+/*------- Machine Counter/Timers------*/
 `define  CSR_CYCLE_ADDR           12'hc00
 `define  CSR_CYCLEH_ADDR          12'hc80
 `define  CSR_MCYCLE_ADDR          12'hB00
@@ -202,7 +204,6 @@
 
 
 /* --------------config parameters -----------*/
-`define  REBOOT_ADDR              32'h80         //  32'h80 for c-test program, 32'h00000000: for isa test
 `define  MTVEC_RESET              32'h00000001
 
 //exception

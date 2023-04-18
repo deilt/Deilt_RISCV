@@ -28,6 +28,7 @@ module ctrl(
     input                           ex_jump_en_i            ,
     input[`InstAddrBus]             ex_jump_base_i          ,
     input[`InstAddrBus]             ex_jump_ofst_i          ,
+
     //from prd/id
     input                           prd_jump_en_i           ,//equle to id_hold_flag_i,for pipline flush
     //to pc/if
@@ -37,18 +38,49 @@ module ctrl(
     //from id
     input                           id_hold_flag_i          ,
 
-    output[4:0]                     hold_en_o       
+    /* ---signals to other stages of the pipeline  ----*/
+    output[4:0]                     hold_en_o               ,
+    output                          flush_o                 ,
+    
+    //from mem
+    input [31:0]                    exception_i             ,
+
+    /* --- interrupt signals from clint or plic--------*/
+    input                               irq_software_i      ,
+    input                               irq_timer_i         ,
+    input                               irq_external_i      ,
+
+    //to csr
+    output                               cause_type_o,          // interrupt or exception
+    output                               set_cause_o,
+    output  [3:0]                        trap_casue_o,
+
+    output                               set_mepc_o,
+    output [`CsrRegBus]                  mepc_o,
+
+    output                               set_mtval_o,
+    output[`CsrRegBus]                   mtval_o,
+
+    output                               mstatus_mie_clear_o,
+    output                               mstatus_mie_set_o,
+
+    //from csr
+    input                              mstatus_mie_i,
+    input                              mie_external_i, //does miss external interrupt
+    input                              mie_timer_i,
+    input                              mie_sw_i,
+
+    input                              mip_external_i,// external interrupt pending
+    input                              mip_timer_i,   // timer interrupt pending
+    input                              mip_sw_i,      // software interrupt pending
+
+    input [`CsrRegBus]                 mtvec_i,
+    input [`CsrRegBus]                 mepc_i
 );
     reg [4:0]           hold_en_o; 
 
-    //assign ex_jump_addr_o = ex_jump_base_o + ex_jump_ofst_o;
-
-    //判断预测是否正确
-    //assign prd_sus = ((ex_jump_en_i == `JumpEnable && id_ex_jump_en_i == `JumpEnable) && (ex_jump_addr_o == if_id_prd_jump_addr_i));
-
     //正确则不需要冲刷流水线
     //不正确则冲刷流水线
-
     assign prd_fail = (ex_jump_en_i != id_ex_jump_en_i) ;
     
     always @(*) begin
@@ -71,5 +103,20 @@ module ctrl(
             hold_en_o = 5'b00000;
         end
     end    
+
+    //exception_i ={25'b0 ,misaligned_load, misaligned_store, illegal_inst, misaligned_inst, ebreak, ecall, mret}
+    wire   mret;
+    wire   ecall;
+    wire   ebreak;
+    wire   misaligned_inst;
+    wire   illegal_inst;
+    wire   misaligned_store;
+    wire   misaligned_load;
+
+    assign {misaligned_load, misaligned_store, illegal_inst, misaligned_inst, ebreak, ecall, mret} = exception_i[6:0];
+
+    /* check there is a interrupt on pending*/
+
+    /* an interrupt or an exception, need to be processed */
 
 endmodule
