@@ -1516,7 +1516,7 @@ RISC-V 架构规定，在处理器的程序执行过程中， 一旦遇到异常
 
 ![](attachment/mie.png)
 
-- **MEIE** 域控制机器模式（ Machine Mode）下**外部中断**（ External Interrupt ）的屏蔽。
+- **MEIE** 域控制机器模式（ Machine Mode）下**外部中断**（ External Interrupt ）的屏蔽。1表示开放中断。
 - **MTIE** 域控制机器模式（ Machine Mode ）下计**时器中断**（ Timer Interrupt ） 的屏蔽。
 - **MSIE** 域控制机器模式（ Machine Mode ）下**软件中断**（ Software Interrupt ）的屏蔽。
 

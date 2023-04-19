@@ -28,6 +28,9 @@ module pc(
     input[4:0]          hold_en_i       ,
     input               prd_fail        ,
 
+
+    input               flush_o         ,
+    input[`InstAddrBus] new_pc_o        ,
     //from ex
     input[`InstAddrBus] ex_instaddr_i   ,
     input               ex_jump_en_i    ,
@@ -79,6 +82,9 @@ module pc(
     always @(posedge clk or negedge rstn) begin
         if(rstn == `RstEnable)begin
             pc_o <= `CpuResetAddr ; //reset to 32'h0
+        end
+        else if(flush_o)begin
+            pc_o = new_pc_o;
         end
         else begin
             pc_o = pc ;
