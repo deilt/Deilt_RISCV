@@ -32,118 +32,43 @@ module csr_reg(
     input[`CsrRegAddrBus]               csr_wr_addr_i   ,
     input[`CsrRegBus]                   csr_wr_data_i   ,
 
+    input                               instret_incr_i  ,
+
     /* --- interrupt signals from clint or plic--------*/
-    input                               irq_software_i,
-    input                               irq_timer_i,
-    input                               irq_external_i,
+    input                               irq_software_i  ,
+    input                               irq_timer_i     ,
+    input                               irq_external_i  ,
     /* ---- ctrl update epc, mcause, mtval, global ie ----*/
-    input                               cause_type_i,          // interrupt or exception
-    input                               set_cause_i,
-    input  [3:0]                        trap_casue_i,
+    input                               cause_type_i    ,          // interrupt or exception
+    input                               set_cause_i     ,
+    input  [3:0]                        trap_casue_i    ,
 
-    input                               set_mepc_i,
-    input [`CsrRegBus]                  mepc_i,
+    input                               set_mepc_i      ,
+    input [`CsrRegBus]                  mepc_i          ,
 
-    input                               set_mtval_i,
-    input[`CsrRegBus]                   mtval_i,
+    input                               set_mtval_i     ,
+    input[`CsrRegBus]                   mtval_i         ,
 
-    input                               mstatus_mie_clear_i,
-    input                               mstatus_mie_set_i,
+    input                               mstatus_mie_clear_i ,
+    input                               mstatus_mie_set_i   ,
 
     /*-- to control , interrupt enablers, mtvec, epc etc-----*/
-    output                              mstatus_mie_o,
-    output                              mie_external_o, //does miss external interrupt
-    output                              mie_timer_o,
-    output                              mie_sw_o,
+    output                              mstatus_mie_o   ,
+    output                              mie_external_o  , //does miss external interrupt
+    output                              mie_timer_o     ,
+    output                              mie_sw_o        ,
 
-    output                              mip_external_o,// external interrupt pending
-    output                              mip_timer_o,   // timer interrupt pending
-    output                              mip_sw_o,      // software interrupt pending
+    output                              mip_external_o  ,// external interrupt pending
+    output                              mip_timer_o     ,   // timer interrupt pending
+    output                              mip_sw_o        ,      // software interrupt pending
 
-    output [`CsrRegBus]                 mtvec_o,
+    output [`CsrRegBus]                 mtvec_o         ,
     output [`CsrRegBus]                 mepc_o
 );
 
     reg [`CsrRegBus] csr_mem[`CsrRegDepth-1:0] ;
     reg [`CsrRegBus]        csr_data_o;
 
-    //read csr
-    always @(*) begin
-        if(rstn == `RstEnable)
-            csr_data_o = `ZeroReg;
-        else if(csr_wen == `WriteEnable && csr_wr_addr_i == csr_addr_i && csr_read_i == `ReadEnable && csr_wr_addr_i != 12'h0) //from wb
-            csr_data_o = csr_wr_data_i;
-        else if(csr_read_i == `ReadEnable && csr_addr_i != 12'h0)begin
-            case(csr_addr_i)
-                `CSR_MVENDORID_ADDR:begin
-                    csr_data_o = CSR_MVENDORID_VALUE;
-                end
-                `CSR_MARCHID_ADDR:begin
-                    csr_data_o = mscratch;
-                end
-                `CSR_MIMPID_ADDR:begin
-                    csr_data_o = CSR_MIMPID_VALUE;
-                end
-                `CSR_MHARTID_ADDR:begin
-                    csr_data_o = CSR_MHARTID_VALUE;
-                end
-                `CSR_MSTATUS_ADDR:begin
-                    csr_data_o = mstatus;
-                end
-                `CSR_MISA_ADDR:begin
-                    csr_data_o = misa;
-                end
-                `CSR_MIE_ADDR:begin
-                    csr_data_o = mie;
-                end
-                `CSR_MTVEC_ADDR:begin
-                    csr_data_o = mtvec;
-                end
-                `CSR_MSCRATCH_ADDR:begin
-                    csr_data_o = mscratch;
-                end
-                `CSR_MEPC_ADDR:begin
-                    csr_data_o = mepc;
-                end
-                `CSR_MCAUSE_ADDR:begin
-                    csr_data_o = mcause;
-                end
-                `CSR_MTVAL_ADDR:begin
-                    csr_data_o = mtval;
-                end
-                `CSR_MIP_ADDR:begin
-                    csr_data_o = mip;
-                end
-                `CSR_CYCLE_ADDR,`CSR_MCYCLE_ADDR:begin
-                    csr_data_o = mcycle[31:0];
-                end
-                `CSR_CYCLEH_ADDR,`CSR_MCYCLEH_ADDR:begin
-                    csr_data_o = mcycle[63:32];
-                end
-                `CSR_MINSTRET_ADDR:begin
-                    csr_data_o = minstret[31:0];
-                end
-                `CSR_MINSTRETH_ADDR:begin
-                    csr_data_o = minstret[63:32];
-                end
-                default:begin
-                    csr_data_o = `ZeroWord;
-                end
-            endcase
-        end
-    end
-    /* write csr
-    integer i;
-    always @(posedge clk)begin
-        if(rstn == `RstEnable)begin
-            for(i=0;i<32;i=i+1)begin
-                csr_mem[i] <= `ZeroWord;
-            end
-        end
-        else if(csr_wen == `WriteEnable && csr_wr_addr_i != 12'h0)begin
-            csr_mem[csr_wr_addr_i] <= csr_wr_data_i;
-        end
-    end */
 
     // mvendorid
     // The mvendorid CSR is a 32-bit read-only register providing the JEDEC manufacturer ID of the
@@ -398,5 +323,82 @@ module csr_reg(
         end
     end
 
+    //read csr
+    always @(*) begin
+        if(rstn == `RstEnable)
+            csr_data_o = `ZeroReg;
+        else if(csr_wen == `WriteEnable && csr_wr_addr_i == csr_addr_i && csr_read_i == `ReadEnable && csr_wr_addr_i != 12'h0) //from wb
+            csr_data_o = csr_wr_data_i;
+        else if(csr_read_i == `ReadEnable && csr_addr_i != 12'h0)begin
+            case(csr_addr_i)
+                `CSR_MVENDORID_ADDR:begin
+                    csr_data_o = CSR_MVENDORID_VALUE;
+                end
+                `CSR_MARCHID_ADDR:begin
+                    csr_data_o = mscratch;
+                end
+                `CSR_MIMPID_ADDR:begin
+                    csr_data_o = CSR_MIMPID_VALUE;
+                end
+                `CSR_MHARTID_ADDR:begin
+                    csr_data_o = CSR_MHARTID_VALUE;
+                end
+                `CSR_MSTATUS_ADDR:begin
+                    csr_data_o = mstatus;
+                end
+                `CSR_MISA_ADDR:begin
+                    csr_data_o = misa;
+                end
+                `CSR_MIE_ADDR:begin
+                    csr_data_o = mie;
+                end
+                `CSR_MTVEC_ADDR:begin
+                    csr_data_o = mtvec;
+                end
+                `CSR_MSCRATCH_ADDR:begin
+                    csr_data_o = mscratch;
+                end
+                `CSR_MEPC_ADDR:begin
+                    csr_data_o = mepc;
+                end
+                `CSR_MCAUSE_ADDR:begin
+                    csr_data_o = mcause;
+                end
+                `CSR_MTVAL_ADDR:begin
+                    csr_data_o = mtval;
+                end
+                `CSR_MIP_ADDR:begin
+                    csr_data_o = mip;
+                end
+                `CSR_CYCLE_ADDR,`CSR_MCYCLE_ADDR:begin
+                    csr_data_o = mcycle[31:0];
+                end
+                `CSR_CYCLEH_ADDR,`CSR_MCYCLEH_ADDR:begin
+                    csr_data_o = mcycle[63:32];
+                end
+                `CSR_MINSTRET_ADDR:begin
+                    csr_data_o = minstret[31:0];
+                end
+                `CSR_MINSTRETH_ADDR:begin
+                    csr_data_o = minstret[63:32];
+                end
+                default:begin
+                    csr_data_o = `ZeroWord;
+                end
+            endcase
+        end
+    end
+    /* write csr
+    integer i;
+    always @(posedge clk)begin
+        if(rstn == `RstEnable)begin
+            for(i=0;i<32;i=i+1)begin
+                csr_mem[i] <= `ZeroWord;
+            end
+        end
+        else if(csr_wen == `WriteEnable && csr_wr_addr_i != 12'h0)begin
+            csr_mem[csr_wr_addr_i] <= csr_wr_data_i;
+        end
+    end */
 
 endmodule

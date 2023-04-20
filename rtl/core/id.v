@@ -82,7 +82,7 @@ module id(
     wire [2:0]  funct3 = inst_i[14:12];
     wire [6:0]  funct7 = inst_i[31:25];
     wire [4:0]  rs1    = inst_i[19:15];
-    //wire [4:0]  zimm   = inst_i[19:15];
+    wire [4:0]  zimm   = inst_i[19:15];
     wire [4:0]  rs2    = inst_i[24:20]; //rs2 or shamt,they'r equal
     //wire [4:0]  shamt  = inst_i[24:20]; //rs2 or shamt,they'r equal
     wire [4:0]  rd     = inst_i[11:7];
@@ -103,6 +103,12 @@ module id(
 
     reg                         rs1_read_o;
     reg                         rs2_read_o;
+
+    reg                         csr_read_o;
+    reg [`CsrRegAddrBus]        csr_addr_o;
+    reg                         csr_wen_o;
+    reg [`CsrRegAddrBus]        csr_wen_addr_o;
+
 
     reg [`RegBus]               op1;
     reg [`RegBus]               op2;

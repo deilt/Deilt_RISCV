@@ -17,7 +17,7 @@
 ../rtl/core/ctrl.v
 ../rtl/core/ex_mdu.v
 ../rtl/core/ex_mul.v
-
+../rtl/core/csr_reg.v
 
 ../rtl/general/gnrl_dffs.v
 ../rtl/general/gnrl_xchecker.v

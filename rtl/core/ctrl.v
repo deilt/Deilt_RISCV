@@ -54,33 +54,48 @@ module ctrl(
     input                               irq_external_i      ,
 
     //to csr
-    output                               cause_type_o,          // interrupt or exception
-    output                               set_cause_o,
-    output  [3:0]                        trap_casue_o,
+    output                               cause_type_o       ,          // interrupt or exception
+    output                               set_cause_o        ,
+    output  [3:0]                        trap_casue_o       ,
 
-    output                               set_mepc_o,
-    output [`CsrRegBus]                  mepc_o,
+    output                               set_mepc_o         ,
+    output [`CsrRegBus]                  mepc_o             ,
 
-    output                               set_mtval_o,
-    output[`CsrRegBus]                   mtval_o,
+    output                               set_mtval_o        ,
+    output[`CsrRegBus]                   mtval_o            ,
 
     output                               mstatus_mie_clear_o,
-    output                               mstatus_mie_set_o,
+    output                               mstatus_mie_set_o  ,
 
     //from csr
-    input                              mstatus_mie_i,
-    input                              mie_external_i, //does miss external interrupt
-    input                              mie_timer_i,
-    input                              mie_sw_i,
+    input                              mstatus_mie_i        ,
+    input                              mie_external_i       , //does miss external interrupt
+    input                              mie_timer_i          ,
+    input                              mie_sw_i             ,
 
-    input                              mip_external_i,// external interrupt pending
-    input                              mip_timer_i,   // timer interrupt pending
-    input                              mip_sw_i,      // software interrupt pending
+    input                              mip_external_i       ,// external interrupt pending
+    input                              mip_timer_i          ,   // timer interrupt pending
+    input                              mip_sw_i             ,      // software interrupt pending
 
-    input [`CsrRegBus]                 mtvec_i,
+    input [`CsrRegBus]                 mtvec_i              ,
     input [`CsrRegBus]                 mepc_i
 );
     reg [4:0]           hold_en_o; 
+    reg                 flush_o ;
+    reg[`InstAddrBus]   new_pc_o;
+
+    reg[`CsrRegBus]     mepc_o; 
+    reg                 set_mepc_o;
+
+    reg                               cause_type_o;
+    reg                               set_cause_o ;
+    reg  [3:0]                        trap_casue_o;
+
+    reg                               set_mtval_o        ;
+    reg[`CsrRegBus]                   mtval_o            ;
+
+    reg                               mstatus_mie_clear_o;
+    reg                               mstatus_mie_set_o  ;
 
     //正确则不需要冲刷流水线
     //不正确则冲刷流水线
@@ -175,7 +190,7 @@ module ctrl(
         endcase
     end
 
-    always @(posedge clk_i) begin
+    always @(posedge clk) begin
         if(rstn == `RstEnable)
             curr_state <= STATE_RESET;
         else

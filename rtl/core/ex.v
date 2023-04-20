@@ -429,8 +429,8 @@ module ex(
         ex_jump_base = `CpuResetAddr;
         ex_jump_ofst = `ZeroWord;
         
-        cs_o           = `CsDisable;
-        mem_we_o       = `WriteDisable;
+        cs             = `CsDisable;
+        mem_we         = `WriteDisable;
         mem_wem_o      = {`MemUnit{1'b0}};
         mem_din        = `ZeroWord;
         mem_addr_o     = `ZeroReg;
@@ -664,8 +664,8 @@ module ex(
                 ex_jump_base = `CpuResetAddr;
                 ex_jump_ofst = `ZeroWord;
         
-                cs_o           = `CsDisable;
-                mem_we_o       = `WriteDisable;
+                cs             = `CsDisable;
+                mem_we         = `WriteDisable;
                 mem_wem_o      = {`MemUnit{1'b0}};
                 mem_din        = `ZeroWord;
                 mem_addr_o     = `ZeroReg;

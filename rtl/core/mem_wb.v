@@ -46,7 +46,9 @@ module mem_wb(
     //to csr
     output                      csr_wen_o       ,   //add
     output[`CsrRegAddrBus]      csr_wr_addr_o   ,
-    output[`CsrRegBus]          csr_wr_data_o 
+    output[`CsrRegBus]          csr_wr_data_o   ,
+
+    output                      instret_incr_o  
 
 );
 
@@ -91,4 +93,8 @@ module mem_wb(
     reg [`CsrRegAddrBus]       csr_wr_addr_r;
     gnrl_dfflr #(`CsrRegAddrWidth) csr_wr_addr_gnrl_dfflr(clk,rstn,lden,csr_wr_addr_i,csr_wr_addr_r);
     assign csr_wr_addr_o = csr_wr_addr_r;
+
+    reg                     instret_incr_r;
+    gnrl_dfflr #(1) instret_incr_gnrl_dfflr(clk,rstn,lden,1'b1,instret_incr_r);
+    assign instret_incr_o = instret_incr_r;
 endmodule
